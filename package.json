@@ -36,6 +36,7 @@
     "rollup-plugin-less": "^0.1.3",
     "rollup-plugin-node-resolve": "^3.0.0",
     "rollup-plugin-string": "^2.0.2",
+    "rollup-plugin-superviews": "git+https://github.com/robhicks/rollup-plugin-superviews.git",
     "rollup-plugin-uglify": "^2.0.1",
     "rollup-watch": "^4.3.1",
     "sinon": "^3.2.1",

@@ -6,13 +6,15 @@ const nodeResolve = require('rollup-plugin-node-resolve');
 const path = require('path');
 const root = process.cwd();
 const string = require('rollup-plugin-string');
+const superviews = require('rollup-plugin-superviews');
 const uglify = require('rollup-plugin-uglify');
 
 require('events').EventEmitter.defaultMaxListeners = 0;
 
 let input = path.resolve(root, 'src', 's-typeahead.js');
 let plugins = [
-  string({include: '**/*.css'}),
+  string({include: 'src/**/*.css'}),
+  superviews({include: 'src/**/*.html'}),
   buble()
 ];
 let globals = [];
