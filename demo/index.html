@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>s-typeahead</title>
+    <link rel="stylesheet" href="demo.css">
+    <style>
+    s-typeahead {
+
+    }
+    </style>
+    <script src="dist/webcomponents/webcomponents-loader.js"></script>
+    <script src="dist/webcomponents/custom-elements-es5-adapter.js"></script>
+    <script src="node_modules/angular/angular.js"></script>
+    <script type="text/javascript">
+      var process = process || {env: {NODE_ENV: 'production'}};
+    </script>
+  </head>
+  <body ng-controller="MainCtrl">
+    <h1>s-typeahead</h1>
+    <h3>From a Static List</h3>
+    <s-typeahead id="foo"></s-typeahead>
+    <h3>From a Dynamic List (retrieved from server)</h3>
+    <s-typeahead id="bar"></s-typeahead>
+    <h3>Working with Angular</h3>
+    <s-typeahead id="{{options.uid}}" options="{{options}}"></s-typeahead>
+  </body>
+  <script src="dist/s-typeahead.iife.js" charset="utf-8"></script>
+  <script src="src/demo.js" charset="utf-8"></script>
+</html>

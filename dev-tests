@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+./node_modules/json-server/bin/index.js --port 3004 --watch db.json &
+sleep 5
+karma start karma.conf.js
