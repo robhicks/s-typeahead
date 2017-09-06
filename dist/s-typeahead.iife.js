@@ -111,13 +111,14 @@ function generateList() {
   return {wrapper: div, dropdown: ul};
 }
 
-var isJson = function(str) {
+function isJson(str) {
   try {
-    if (JSON.parse(str)) { return true; }
-  } catch(e) {
+    var json = JSON.parse(str);
+    return json;
+  } catch (e) {
     return false;
   }
-};
+}
 
 /**
  * Class to manage URL paths
