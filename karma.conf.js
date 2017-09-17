@@ -23,19 +23,18 @@ module.exports = function(config) {
       }
     },
     files: [
-      'dist/webcomponents/custom-elements-es5-adapter.js',
-      'dist/webcomponents/webcomponents-loader.js',
-      //compoonent
-      'dist/s-typeahead.js',
+      'node_modules/@webcomponents/webcomponentsjs/webcomponents-lite.js',
+      'node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js',
+      'dist/s-typeahead.iife.js',
 
-      //test files
-      'src/**/*.test.js',
+      //test file
+      'src/test.js',
     ],
     frameworks: ['mocha', 'chai-sinon'],
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
     logLevel: config.LOG_ERROR,
     preprocessors: {
-      'src/**/test*.js': ['rollup']
+      'src/test.js': ['rollup']
     },
     reporters: ['spec'],
     rollupPreprocessor: {

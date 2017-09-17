@@ -4,7 +4,7 @@
   font-family: var(--font-family, arial);
 }
 
-#type-ahead input {
+input {
   box-sizing: border-box;
   border: var(--border, 1px solid #ddd);
   border-top-right-radius: var(--radius, 3px);
@@ -17,11 +17,11 @@
   width: 100%;
 }
 
-#type-ahead .wrapper {
+.wrapper {
   position: relative;
 }
 
-#type-ahead ul {
+ul {
   background: #fff;
   margin: 0;
   padding: 0;
@@ -30,7 +30,7 @@
   z-index: 9999;
 }
 
-#type-ahead li {
+li {
   border-bottom: var(--border, 1px solid #ddd);
   border-left: var(--border, 1px solid #ddd);
   border-right: var(--border, 1px solid #ddd);
@@ -44,12 +44,12 @@ b {
   color: var(--bold-color, blue);
 }
 
-#type-ahead li.highlight {
+li.highlight {
   background-color: var(--highlight, rgb(228,240,255));
   cursor: pointer;
 }
 
-#type-ahead li.hover {
+li.hover {
   background-color: var(--hover, rgb(228,240,244));
   cursor: pointer;
 }

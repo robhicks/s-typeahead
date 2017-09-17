@@ -26,7 +26,7 @@ function appendAfter(el, sibling) {
   el.parentNode.appendChild(sibling);
 }
 
-var css = ":host {\n  display: block;\n  box-sizing: border-box;\n  font-family: var(--font-family, arial);\n}\n\n#type-ahead input {\n  box-sizing: border-box;\n  border: var(--border, 1px solid #ddd);\n  border-top-right-radius: var(--radius, 3px);\n  border-top-left-radius: var(--radius, 3px);\n  color: var(--input-text-color, #444);\n  font-size: var(--font-size, 20px);\n  outline: 0;\n  padding: var(--input-padding, 10px);\n  margin: 0;\n  width: 100%;\n}\n\n#type-ahead .wrapper {\n  position: relative;\n}\n\n#type-ahead ul {\n  background: #fff;\n  margin: 0;\n  padding: 0;\n  position: absolute;\n  width: 100%;\n  z-index: 9999;\n}\n\n#type-ahead li {\n  border-bottom: var(--border, 1px solid #ddd);\n  border-left: var(--border, 1px solid #ddd);\n  border-right: var(--border, 1px solid #ddd);\n  color: var(--dropdown-text-color, #555);\n  font-family: var(--font-family, arial);\n  list-style-type: none;\n  padding: var(--dropdown-padding, 10px);\n}\n\nb {\n  color: var(--bold-color, blue);\n}\n\n#type-ahead li.highlight {\n  background-color: var(--highlight, rgb(228,240,255));\n  cursor: pointer;\n}\n\n#type-ahead li.hover {\n  background-color: var(--hover, rgb(228,240,244));\n  cursor: pointer;\n}\n";
+var css = ":host {\n  display: block;\n  box-sizing: border-box;\n  font-family: var(--font-family, arial);\n}\n\ninput {\n  box-sizing: border-box;\n  border: var(--border, 1px solid #ddd);\n  border-top-right-radius: var(--radius, 3px);\n  border-top-left-radius: var(--radius, 3px);\n  color: var(--input-text-color, #444);\n  font-size: var(--font-size, 20px);\n  outline: 0;\n  padding: var(--input-padding, 10px);\n  margin: 0;\n  width: 100%;\n}\n\n.wrapper {\n  position: relative;\n}\n\nul {\n  background: #fff;\n  margin: 0;\n  padding: 0;\n  position: absolute;\n  width: 100%;\n  z-index: 9999;\n}\n\nli {\n  border-bottom: var(--border, 1px solid #ddd);\n  border-left: var(--border, 1px solid #ddd);\n  border-right: var(--border, 1px solid #ddd);\n  color: var(--dropdown-text-color, #555);\n  font-family: var(--font-family, arial);\n  list-style-type: none;\n  padding: var(--dropdown-padding, 10px);\n}\n\nb {\n  color: var(--bold-color, blue);\n}\n\nli.highlight {\n  background-color: var(--highlight, rgb(228,240,255));\n  cursor: pointer;\n}\n\nli.hover {\n  background-color: var(--hover, rgb(228,240,244));\n  cursor: pointer;\n}\n";
 
 var DataStore = function DataStore() {
   this.storeMap = {};
@@ -433,9 +433,6 @@ StringBuilder.prototype.insert = function insert (pos, val) {
   return this;
 };
 
-/**
- * Uri - manipulate URLs
- */
 var TinyUri = function TinyUri(uri) {
   this.uriRegEx = /^(([^:\/?#]+):)?(\/\/([^\/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/;
   this.authRegEx = /^([^\@]+)\@/;
@@ -576,16 +573,6 @@ TinyUri.clone = function clone (uri) {
   return new TinyUri(uri.toString());
 };
 
-/*
- * makeRequest
- * url: the source url for the AJAX request
- * term: the search terms (object) to be added as a query to the source url, such
- * as {query: 'foo'}
- * callback: a function to be called if the AJAX request is successful
- * _this: optional this used by the callback function
- * Builds a URL with the search term and makes an AJAX request.
- * returns promise.
- */
 function makeRequest(url, term, queryParams) {
   if ( queryParams === void 0 ) queryParams = {};
 
@@ -619,29 +606,8 @@ StringBuilder$2.prototype.insert = function insert (pos, val) {
 
 var STypeahead = (function (HTMLElement) {
   function STypeahead() {
-    var this$1 = this;
-
     HTMLElement.call(this);
-    this.activeClass = 'highlight';
-    this.hoverClass = 'hover';
     this.attachShadow({mode: 'open'});
-    this.shadowRoot.innerHTML = "<style>" + css + "</style><div id=\"type-ahead\"><input /></div>";
-    this.input = this.shadowRoot.querySelector('input');
-    this.input.onkeyup = this.onKeyupHandler.bind(this);
-    this.datastore = new DataStore();
-    // this.input.onfocus = this.onFocusHandler.bind(this);
-    this.input.onblur = this.onBlurHandler.bind(this);
-    this._options = {};
-    this.actionFunctions = {
-      // Enter key
-      13: function () { return this$1.triggerSelect(this$1.getDropdownItems()[this$1.index], true); },
-      // Escape key
-      27: function () { return this$1.clearSearch(); },
-      // Up arrow
-      38: function () { return this$1.updateIndex(true); },
-      // Down arrow
-      40: function () { return this$1.updateIndex(); }
-    };
   }
 
   if ( HTMLElement ) STypeahead.__proto__ = HTMLElement;
@@ -693,10 +659,10 @@ var STypeahead = (function (HTMLElement) {
     var this$1 = this;
 
     if (nVal && nVal !== '' && nVal !== oVal) {
-      if (name === 'options') {
+      if (name === 'options' && this._options) {
         Object.assign(this._options, isJson(nVal) ? JSON.parse(nVal) : {});
-        if (this._options.list && typeof this._options.list[0] === 'object' && !this._options.propertyInObjectArrayToUse) { throw new Error('propertyInObjectArrayToUse required if list contains objects'); }
-        if (this._options.list && this._options.propertyInObjectArrayToUse) {
+        if (this._options.list && typeof this._options.list[0] === 'object') {
+          if (!this._options.propertyInObjectArrayToUse) { throw new Error('propertyInObjectArrayToUse required if list contains objects'); }
           this._options.list = this._options.list.map(function (li) { return li[this$1._options.propertyInObjectArrayToUse]; });
         }
         if (this._options.placeholder) { this.input.placeholder = this._options.placeholder; }
@@ -762,23 +728,43 @@ var STypeahead = (function (HTMLElement) {
    * Setup the initial dropdown.
    */
   STypeahead.prototype.createDropdown = function createDropdown () {
-      // This returns an object of {dropdown: DOM, wrapper: DOM}
-      var list = generateList();
+    // This returns an object of {dropdown: DOM, wrapper: DOM}
+    var list = generateList();
 
-      // Grab the unordered list
-      this.dropdown = list.dropdown;
+    // Grab the unordered list
+    this.dropdown = list.dropdown;
 
-      this.setIndex();
+    this.setIndex();
 
-      // Hide the list
-      this.hideDropdown();
+    // Hide the list
+    this.hideDropdown();
 
-      // Append it after the input
-      appendAfter(this.input, list.wrapper);
+    // Append it after the input
+    appendAfter(this.input, list.wrapper);
   };
 
   STypeahead.prototype.connectedCallback = function connectedCallback () {
+    var this$1 = this;
 
+    this.shadowRoot.innerHTML = "<style>" + css + "</style><div><input /></div>";
+    this.input = this.shadowRoot.querySelector('input');
+    this._options = this._options || {};
+    this.activeClass = 'highlight';
+    this.hoverClass = 'hover';
+    this.input.onkeyup = this.onKeyupHandler.bind(this);
+    // this.input.onfocus = this.onFocusHandler.bind(this);
+    this.input.onblur = this.onBlurHandler.bind(this);
+    this.datastore = new DataStore();
+    this.actionFunctions = {
+      // Enter key
+      13: function () { return this$1.triggerSelect(this$1.getDropdownItems()[this$1.index], true); },
+      // Escape key
+      27: function () { return this$1.clearSearch(); },
+      // Up arrow
+      38: function () { return this$1.updateIndex(true); },
+      // Down arrow
+      40: function () { return this$1.updateIndex(); }
+    };
   };
 
   /*

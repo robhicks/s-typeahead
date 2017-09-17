@@ -11,26 +11,7 @@ import StringBuilder from '../node_modules/s-utilities/src/StringBuilder';
 class STypeahead extends HTMLElement {
   constructor() {
     super();
-    this.activeClass = 'highlight';
-    this.hoverClass = 'hover';
     this.attachShadow({mode: 'open'});
-    this.shadowRoot.innerHTML = `<style>${css}</style><div id="type-ahead"><input /></div>`;
-    this.input = this.shadowRoot.querySelector('input');
-    this.input.onkeyup = this.onKeyupHandler.bind(this);
-    this.datastore = new DataStore();
-    // this.input.onfocus = this.onFocusHandler.bind(this);
-    this.input.onblur = this.onBlurHandler.bind(this);
-    this._options = {};
-    this.actionFunctions = {
-      // Enter key
-      13: () => this.triggerSelect(this.getDropdownItems()[this.index], true),
-      // Escape key
-      27: () => this.clearSearch(),
-      // Up arrow
-      38: () => this.updateIndex(true),
-      // Down arrow
-      40: () => this.updateIndex()
-    };
   }
 
 /**
@@ -71,10 +52,10 @@ class STypeahead extends HTMLElement {
 
   attributeChangedCallback(name, oVal, nVal) {
     if (nVal && nVal !== '' && nVal !== oVal) {
-      if (name === 'options') {
+      if (name === 'options' && this._options) {
         Object.assign(this._options, isJson(nVal) ? JSON.parse(nVal) : {});
-        if (this._options.list && typeof this._options.list[0] === 'object' && !this._options.propertyInObjectArrayToUse) throw new Error('propertyInObjectArrayToUse required if list contains objects');
-        if (this._options.list && this._options.propertyInObjectArrayToUse) {
+        if (this._options.list && typeof this._options.list[0] === 'object') {
+          if (!this._options.propertyInObjectArrayToUse) throw new Error('propertyInObjectArrayToUse required if list contains objects');
           this._options.list = this._options.list.map((li) => li[this._options.propertyInObjectArrayToUse]);
         }
         if (this._options.placeholder) this.input.placeholder = this._options.placeholder;
@@ -139,23 +120,41 @@ class STypeahead extends HTMLElement {
    * Setup the initial dropdown.
    */
   createDropdown() {
-      // This returns an object of {dropdown: DOM, wrapper: DOM}
-      let list = generateList();
+    // This returns an object of {dropdown: DOM, wrapper: DOM}
+    let list = generateList();
 
-      // Grab the unordered list
-      this.dropdown = list.dropdown;
+    // Grab the unordered list
+    this.dropdown = list.dropdown;
 
-      this.setIndex();
+    this.setIndex();
 
-      // Hide the list
-      this.hideDropdown();
+    // Hide the list
+    this.hideDropdown();
 
-      // Append it after the input
-      appendAfter(this.input, list.wrapper);
+    // Append it after the input
+    appendAfter(this.input, list.wrapper);
   }
 
   connectedCallback() {
-
+    this.shadowRoot.innerHTML = `<style>${css}</style><div><input /></div>`;
+    this.input = this.shadowRoot.querySelector('input');
+    this._options = this._options || {};
+    this.activeClass = 'highlight';
+    this.hoverClass = 'hover';
+    this.input.onkeyup = this.onKeyupHandler.bind(this);
+    // this.input.onfocus = this.onFocusHandler.bind(this);
+    this.input.onblur = this.onBlurHandler.bind(this);
+    this.datastore = new DataStore();
+    this.actionFunctions = {
+      // Enter key
+      13: () => this.triggerSelect(this.getDropdownItems()[this.index], true),
+      // Escape key
+      27: () => this.clearSearch(),
+      // Up arrow
+      38: () => this.updateIndex(true),
+      // Down arrow
+      40: () => this.updateIndex()
+    };
   }
 
   /*
