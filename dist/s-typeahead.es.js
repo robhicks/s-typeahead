@@ -570,17 +570,25 @@ TinyUri.clone = function clone (uri) {
   return new TinyUri(uri.toString());
 };
 
-function makeRequest(url, term, queryParams) {
-  if ( queryParams === void 0 ) queryParams = {};
-
-  var searchParam = queryParams.searchParam;
-  var requestParams = {};
-  if (searchParam) { requestParams[searchParam] = term; }
-  Object.assign(requestParams, queryParams.otherParams);
-
-  var _url = new TinyUri(url).query.set(requestParams).toString();
-  return fetch(_url).then(function (resp) { return resp.json(); });
-}
+// export default function makeRequest(url, term, queryParams = {}) {
+//   let searchParam = queryParams.searchParam;
+//   let requestParams = {};
+//   if (searchParam) requestParams[searchParam] = term;
+//   Object.assign(requestParams, queryParams.otherParams);
+//   let _url = new TinyUri(url).query.set(requestParams).toString();
+//   let _urlDecoded = decodeURIComponent(_url);
+//   let _urlFinal = _urlDecoded.replace(/(:=)+/g, ':')
+//   if (term === '') Promise.resolve([]);
+//   let myHeaders = new Headers();
+//   myHeaders.append('Accept', 'application/json');
+//   console.log('myHeaders', myHeaders);
+//   let myInit = {
+//     method: 'GET',
+//     headers: myHeaders,
+//   }
+//   console.log('myInit', myInit);
+//   return fetch(_urlFinal, myInit).then((resp) => resp.json());
+// }
 
 var StringBuilder$2 = function StringBuilder(string) {
   if ( string === void 0 ) string = '';
@@ -841,17 +849,15 @@ var STypeahead = (function (HTMLElement) {
    * @return {[String]}     [Item from the list or undefined if not found]
    */
   STypeahead.prototype.getItemFromList = function getItemFromList (val, list) {
-    var this$1 = this;
-
     if (this._options.list) {
       var i = this._options.list.find(function (item) { return item.toLowerCase() === val.toLowerCase(); });
       return Promise.resolve(i ? i : '');
     }
-    return makeRequest(this._options.source, val, this._options.queryParams)
-      .then(function (matches) {
-        var match = matches.find(function (m) { return val === m[this$1._options.propertyInObjectArrayToUse]; });
-        return match ? match[this$1._options.propertyInObjectArrayToUse] : null;
-      });
+    // return makeRequest(this._options.source, val, this._options.queryParams)
+    //   .then((matches) => {
+    //     let match = matches.find((m) => val === m[this._options.propertyInObjectArrayToUse]);
+    //     return match ? match[this._options.propertyInObjectArrayToUse] : null;
+    //   });
   };
 
   STypeahead.prototype.hideDropdown = function hideDropdown () {
@@ -864,24 +870,30 @@ var STypeahead = (function (HTMLElement) {
    * and update the dropdown with the returned values.
    */
   STypeahead.prototype.onInputChange = function onInputChange () {
-    var this$1 = this;
-
+    var _this = this;
     if (this._options.list) {
       // When searching from a static list, find the matches and update the dropdown with these matches
       var matches = findMatches(this.currentValue, this._options.list);
       this.updateDropdown(matches);
     } else if (this._options.source) {
+        document.addEventListener('updateDropdownEvent', function(evt) {
+          console.log('event', evt);
+          _this.updateDropdown(evt.detail.matches);
+        });
       // Otherwise, hook up to a server call and update the dropdown with the matches
-      makeRequest(this._options.source, this.currentValue, this._options.queryParams).then(function (matches) {
-        matches = this$1._options.propertyInObjectArrayToUse ? matches.map(function (m) { return m[this$1._options.propertyInObjectArrayToUse]; }) : matches;
-        this$1.updateDropdown(matches);
+      document.dispatchEvent(new CustomEvent('inputChangedEvent', {detail: {value: this.currentValue}}));
+
+      // makeRequest(this._options.source, this.currentValue, this._options.queryParams).then((matches) => {
+      //   matches = this._options.propertyInObjectArrayToUse ? matches.map((m) => m[this._options.propertyInObjectArrayToUse]) : matches;
+      //   this.updateDropdown(matches);
         // if (Array.isArray(matches)) {
         //   let labels = this.parseMatches(matches);
         //   this.updateDropdown(labels, matches);
         // } else {
         //   this.updateDropdown(matches);
         // }
-      });
+      // });
+
     }
   };
 

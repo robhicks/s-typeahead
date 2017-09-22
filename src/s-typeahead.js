@@ -233,11 +233,11 @@ class STypeahead extends HTMLElement {
       let i = this._options.list.find((item) => item.toLowerCase() === val.toLowerCase());
       return Promise.resolve(i ? i : '');
     }
-    return makeRequest(this._options.source, val, this._options.queryParams)
-      .then((matches) => {
-        let match = matches.find((m) => val === m[this._options.propertyInObjectArrayToUse]);
-        return match ? match[this._options.propertyInObjectArrayToUse] : null;
-      });
+    // return makeRequest(this._options.source, val, this._options.queryParams)
+    //   .then((matches) => {
+    //     let match = matches.find((m) => val === m[this._options.propertyInObjectArrayToUse]);
+    //     return match ? match[this._options.propertyInObjectArrayToUse] : null;
+    //   });
   }
 
   hideDropdown() {
@@ -250,22 +250,30 @@ class STypeahead extends HTMLElement {
    * and update the dropdown with the returned values.
    */
   onInputChange() {
+    let _this = this;
     if (this._options.list) {
       // When searching from a static list, find the matches and update the dropdown with these matches
       let matches = findMatches(this.currentValue, this._options.list);
       this.updateDropdown(matches);
     } else if (this._options.source) {
+        document.addEventListener('updateDropdownEvent', function(evt) {
+          console.log('event', evt);
+          _this.updateDropdown(evt.detail.matches);
+        });
       // Otherwise, hook up to a server call and update the dropdown with the matches
-      makeRequest(this._options.source, this.currentValue, this._options.queryParams).then((matches) => {
-        matches = this._options.propertyInObjectArrayToUse ? matches.map((m) => m[this._options.propertyInObjectArrayToUse]) : matches;
-        this.updateDropdown(matches);
+      document.dispatchEvent(new CustomEvent('inputChangedEvent', {detail: {value: this.currentValue}}));
+
+      // makeRequest(this._options.source, this.currentValue, this._options.queryParams).then((matches) => {
+      //   matches = this._options.propertyInObjectArrayToUse ? matches.map((m) => m[this._options.propertyInObjectArrayToUse]) : matches;
+      //   this.updateDropdown(matches);
         // if (Array.isArray(matches)) {
         //   let labels = this.parseMatches(matches);
         //   this.updateDropdown(labels, matches);
         // } else {
         //   this.updateDropdown(matches);
         // }
-      });
+      // });
+
     }
   }
 
