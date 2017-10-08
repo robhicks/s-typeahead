@@ -38,8 +38,6 @@ export default [
   },
   {
     input,
-    plugins,
-    globals,
     output: {
       file: path.resolve(root, 'dist', 's-typeahead.es.js'),
       format: 'es'

@@ -1,6 +1,6 @@
 import {addClass, hasClass, removeClass} from '../node_modules/s-utilities/src/manageClasses';
 import appendAfter from '../node_modules/s-utilities/src/appendAfter';
-import css from './s-typeahead.css';
+import css from './s-typeahead-css.js';
 import DataStore from '../node_modules/s-utilities/src/DataStore';
 import findMatches from './findMatches';
 import generateList from './generateList';

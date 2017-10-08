@@ -26,7 +26,7 @@ function appendAfter(el, sibling) {
   el.parentNode.appendChild(sibling);
 }
 
-var css = ":host {\n  display: block;\n  box-sizing: border-box;\n  font-family: var(--font-family, arial);\n}\n\ninput {\n  box-sizing: border-box;\n  border: var(--border, 1px solid #ddd);\n  border-top-right-radius: var(--radius, 3px);\n  border-top-left-radius: var(--radius, 3px);\n  color: var(--input-text-color, #444);\n  font-size: var(--font-size, 20px);\n  outline: 0;\n  padding: var(--input-padding, 10px);\n  margin: 0;\n  width: 100%;\n}\n\n.wrapper {\n  position: relative;\n}\n\nul {\n  background: #fff;\n  margin: 0;\n  padding: 0;\n  position: absolute;\n  width: 100%;\n  z-index: 9999;\n}\n\nli {\n  border-bottom: var(--border, 1px solid #ddd);\n  border-left: var(--border, 1px solid #ddd);\n  border-right: var(--border, 1px solid #ddd);\n  color: var(--dropdown-text-color, #555);\n  font-family: var(--font-family, arial);\n  list-style-type: none;\n  padding: var(--dropdown-padding, 10px);\n}\n\nb {\n  color: var(--bold-color, blue);\n}\n\nli.highlight {\n  background-color: var(--highlight, rgb(228,240,255));\n  cursor: pointer;\n}\n\nli.hover {\n  background-color: var(--hover, rgb(228,240,244));\n  cursor: pointer;\n}\n";
+var css = "\n:host {\n  display: block;\n  box-sizing: border-box;\n  font-family: var(--font-family, arial);\n}\n\ninput {\n  box-sizing: border-box;\n  border: var(--border, 1px solid #ddd);\n  border-top-right-radius: var(--radius, 3px);\n  border-top-left-radius: var(--radius, 3px);\n  color: var(--input-text-color, #444);\n  font-size: var(--font-size, 20px);\n  outline: 0;\n  padding: var(--input-padding, 10px);\n  margin: 0;\n  width: 100%;\n}\n\n.wrapper {\n  position: relative;\n}\n\nul {\n  background: #fff;\n  margin: 0;\n  padding: 0;\n  position: absolute;\n  width: 100%;\n  z-index: 9999;\n}\n\nli {\n  border-bottom: var(--border, 1px solid #ddd);\n  border-left: var(--border, 1px solid #ddd);\n  border-right: var(--border, 1px solid #ddd);\n  color: var(--dropdown-text-color, #555);\n  font-family: var(--font-family, arial);\n  list-style-type: none;\n  padding: var(--dropdown-padding, 10px);\n}\n\nb {\n  color: var(--bold-color, blue);\n}\n\nli.highlight {\n  background-color: var(--highlight, rgb(228,240,255));\n  cursor: pointer;\n}\n\nli.hover {\n  background-color: var(--hover, rgb(228,240,244));\n  cursor: pointer;\n}\n\n";
 
 var DataStore = function DataStore() {
   this.storeMap = {};
@@ -433,6 +433,9 @@ StringBuilder.prototype.insert = function insert (pos, val) {
   return this;
 };
 
+/**
+ * Uri - manipulate URLs
+ */
 var TinyUri = function TinyUri(uri) {
   this.uriRegEx = /^(([^:\/?#]+):)?(\/\/([^\/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/;
   this.authRegEx = /^([^\@]+)\@/;
@@ -573,6 +576,16 @@ TinyUri.clone = function clone (uri) {
   return new TinyUri(uri.toString());
 };
 
+/*
+ * makeRequest
+ * url: the source url for the AJAX request
+ * term: the search terms (object) to be added as a query to the source url, such
+ * as {query: 'foo'}
+ * callback: a function to be called if the AJAX request is successful
+ * _this: optional this used by the callback function
+ * Builds a URL with the search term and makes an AJAX request.
+ * returns promise.
+ */
 function makeRequest(url, term, queryParams) {
   if ( queryParams === void 0 ) queryParams = {};
 

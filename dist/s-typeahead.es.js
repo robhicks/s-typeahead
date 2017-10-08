@@ -23,55 +23,114 @@ function appendAfter(el, sibling) {
   el.parentNode.appendChild(sibling);
 }
 
-var css = ":host {\n  display: block;\n  box-sizing: border-box;\n  font-family: var(--font-family, arial);\n}\n\ninput {\n  box-sizing: border-box;\n  border: var(--border, 1px solid #ddd);\n  border-top-right-radius: var(--radius, 3px);\n  border-top-left-radius: var(--radius, 3px);\n  color: var(--input-text-color, #444);\n  font-size: var(--font-size, 20px);\n  outline: 0;\n  padding: var(--input-padding, 10px);\n  margin: 0;\n  width: 100%;\n}\n\n.wrapper {\n  position: relative;\n}\n\nul {\n  background: #fff;\n  margin: 0;\n  padding: 0;\n  position: absolute;\n  width: 100%;\n  z-index: 9999;\n}\n\nli {\n  border-bottom: var(--border, 1px solid #ddd);\n  border-left: var(--border, 1px solid #ddd);\n  border-right: var(--border, 1px solid #ddd);\n  color: var(--dropdown-text-color, #555);\n  font-family: var(--font-family, arial);\n  list-style-type: none;\n  padding: var(--dropdown-padding, 10px);\n}\n\nb {\n  color: var(--bold-color, blue);\n}\n\nli.highlight {\n  background-color: var(--highlight, rgb(228,240,255));\n  cursor: pointer;\n}\n\nli.hover {\n  background-color: var(--hover, rgb(228,240,244));\n  cursor: pointer;\n}\n";
+var css = `
+:host {
+  display: block;
+  box-sizing: border-box;
+  font-family: var(--font-family, arial);
+}
 
-var DataStore = function DataStore() {
-  this.storeMap = {};
-};
+input {
+  box-sizing: border-box;
+  border: var(--border, 1px solid #ddd);
+  border-top-right-radius: var(--radius, 3px);
+  border-top-left-radius: var(--radius, 3px);
+  color: var(--input-text-color, #444);
+  font-size: var(--font-size, 20px);
+  outline: 0;
+  padding: var(--input-padding, 10px);
+  margin: 0;
+  width: 100%;
+}
 
-// this.get(el, "hi");
-DataStore.prototype.get = function get (element, key) {
-  return this.getStore(element)[key] || null;
-};
+.wrapper {
+  position: relative;
+}
 
-DataStore.prototype.getAll = function getAll () {
-  console.log("this.storeMap", this.storeMap);
-};
+ul {
+  background: #fff;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  width: 100%;
+  z-index: 9999;
+}
 
-// this.set(el, "hi", {"number": 4}
-DataStore.prototype.set = function set (element, key, value) {
-  if (!value) { return; }
-  this.getStore(element)[key] = value;
-  return value;
-};
+li {
+  border-bottom: var(--border, 1px solid #ddd);
+  border-left: var(--border, 1px solid #ddd);
+  border-right: var(--border, 1px solid #ddd);
+  color: var(--dropdown-text-color, #555);
+  font-family: var(--font-family, arial);
+  list-style-type: none;
+  padding: var(--dropdown-padding, 10px);
+}
 
-// this.remove(el);
-// this.remove(el, "hi");
-DataStore.prototype.remove = function remove (element, key) {
-  if (key) {
-    var store = this.getStore(element);
-    if (store[key]) { delete store[key]; }
-  } else {
-    var elementId = element[this.storeId];
-    if (elementId) {
-      delete this.storeMap[elementId];
-      delete element[this.storeId];
+b {
+  color: var(--bold-color, blue);
+}
+
+li.highlight {
+  background-color: var(--highlight, rgb(228,240,255));
+  cursor: pointer;
+}
+
+li.hover {
+  background-color: var(--hover, rgb(228,240,244));
+  cursor: pointer;
+}
+
+`;
+
+class DataStore {
+  constructor() {
+    this.storeMap = {};
+  }
+
+  // this.get(el, "hi");
+  get(element, key) {
+    return this.getStore(element)[key] || null;
+  }
+
+  getAll() {
+    console.log("this.storeMap", this.storeMap);
+  }
+
+  // this.set(el, "hi", {"number": 4}
+  set(element, key, value) {
+    if (!value) return;
+    this.getStore(element)[key] = value;
+    return value;
+  }
+
+  // this.remove(el);
+  // this.remove(el, "hi");
+  remove(element, key) {
+    if (key) {
+      let store = this.getStore(element);
+      if (store[key]) delete store[key];
+    } else {
+      let elementId = element[this.storeId];
+      if (elementId) {
+        delete this.storeMap[elementId];
+        delete element[this.storeId];
+      }
     }
   }
-};
 
-DataStore.prototype.getStore = function getStore (element) {
-  var storeId = this.storeId;
-  var storeMap = this.storeMap;
-  var elementId = element[storeId];
+  getStore(element) {
+    let storeId = this.storeId;
+    let storeMap = this.storeMap;
+    let elementId = element[storeId];
 
-  if (!elementId) {
-    elementId = element[storeId] = this.uid++;
-    storeMap[elementId] = {};
+    if (!elementId) {
+      elementId = element[storeId] = this.uid++;
+      storeMap[elementId] = {};
+    }
+
+    return storeMap[elementId];
   }
-
-  return storeMap[elementId];
-};
+}
 
 /*
  * findMatches
@@ -81,11 +140,9 @@ DataStore.prototype.getStore = function getStore (element) {
  * "Contains" means that the search term must be at the beginning of the string
  * or at the beginning of a word in the string (so after a space)
  */
-function findMatches(term, items) {
-  if ( items === void 0 ) items = [];
-
-  if (term === "") { return []; }
-  return items.sort().filter(function (item, i) { return new RegExp('^' + term, 'i').test(item); });
+function findMatches(term, items = []) {
+  if (term === "") return [];
+  return items.sort().filter((item, i) => new RegExp('^' + term, 'i').test(item));
   // return items.sort().map((item, i) => item.match(new RegExp('\\b' + term, 'gi')));
 }
 
@@ -99,8 +156,8 @@ function findMatches(term, items) {
  * </div>
  */
 function generateList() {
-  var ul = document.createElement('ul');
-  var div = document.createElement('div');
+  let ul = document.createElement('ul');
+  let div = document.createElement('div');
 
   div.classList.add('wrapper');
   div.appendChild(ul);
@@ -110,7 +167,7 @@ function generateList() {
 
 function isJson(str) {
   try {
-    var json = JSON.parse(str);
+    let json = JSON.parse(str);
     return json;
   } catch (e) {
     return false;
@@ -120,499 +177,509 @@ function isJson(str) {
 /**
  * Class to manage URL paths
  */
-var Path = function Path(f, ctx) {
-  if ( ctx === void 0 ) ctx = {};
+class Path {
+  /**
+   * @param {string} f - string path
+   * @param {object} ctx - context of Uri class
+   */
+  constructor(f, ctx = {}) {
+    this.ctx = ctx;
+    this._path = [];
+    return this.parse(f);
+  }
 
-  this.ctx = ctx;
-  this._path = [];
-  return this.parse(f);
-};
-
-/**
- * Append to a path
- * @param {string} s path to append
- * @return {instance} for chaining
- */
-Path.prototype.append = function append (s) {
-  this._path.push(s);
-  return this.ctx;
-};
-
-/**
- * Delete end of path
- * @param {integer} loc - segment of path to delete
- * @return {instance} for chaining
- */
-Path.prototype.delete = function delete$1 (loc) {
-  if (!loc) {
-    this._path.pop();
+  /**
+   * Append to a path
+   * @param {string} s path to append
+   * @return {instance} for chaining
+   */
+  append(s) {
+    this._path.push(s);
     return this.ctx;
   }
-};
 
-/**
- * Get the path
- * @return {array} path as array
- */
-Path.prototype.get = function get () {
-  return this._path;
-};
-
-/**
- * Parse the path part of a URl
- * @param {string} f - string path
- * @return {instance} for chaining
- */
-Path.prototype.parse = function parse (f) {
-    if ( f === void 0 ) f = '';
-
-  var path = decodeURIComponent(f);
-  var split = path.split('/');
-  if (Array.isArray(split)) {
-    if(path.match(/^\//)) { split.shift(); }
-    if (split.length > 1 && path.match(/\/$/)) { split.pop(); }
-    this._path = split;
+  /**
+   * Delete end of path
+   * @param {integer} loc - segment of path to delete
+   * @return {instance} for chaining
+   */
+  delete(loc) {
+    if (!loc) {
+      this._path.pop();
+      return this.ctx;
+    }
   }
-  return this;
-};
 
-/**
- * Replace part of a path
- * @param {string} f - path replacement
- * @param {integer} loc - location to replace
- * @return {instance} for chaining
- */
-Path.prototype.replace = function replace (f, loc) {
-  if (loc === 'file') {
-    this._path.splice(this._path.length - 1, 1, f);
-    return this.ctx;
-  } else if (Number.isInteger(loc)) {
-    this._path.splice(loc, 1, f);
+  /**
+   * Get the path
+   * @return {array} path as array
+   */
+  get() {
+    return this._path;
+  }
+
+  /**
+   * Parse the path part of a URl
+   * @param {string} f - string path
+   * @return {instance} for chaining
+   */
+  parse(f = '') {
+    let path = decodeURIComponent(f);
+    let split = path.split('/');
+    if (Array.isArray(split)) {
+      if(path.match(/^\//)) split.shift();
+      if (split.length > 1 && path.match(/\/$/)) split.pop();
+      this._path = split;
+    }
+    return this;
+  }
+
+  /**
+   * Replace part of a path
+   * @param {string} f - path replacement
+   * @param {integer} loc - location to replace
+   * @return {instance} for chaining
+   */
+  replace(f, loc) {
+    if (loc === 'file') {
+      this._path.splice(this._path.length - 1, 1, f);
+      return this.ctx;
+    } else if (Number.isInteger(loc)) {
+      this._path.splice(loc, 1, f);
+      return this.ctx;
+    }
+    this.parse(f);
     return this.ctx;
   }
-  this.parse(f);
-  return this.ctx;
-};
 
-/**
- * Get string representatio of the path or the uri
- * @param {boolen} uri - if true return string represention of uri
- * @return {string} path or uri as string
- */
-Path.prototype.toString = function toString (uri) {
-  if (uri) { return this.ctx.toString(); }
-  return Array.isArray(this._path) ? this._path.join('/') : '';
-};
+  /**
+   * Get string representatio of the path or the uri
+   * @param {boolen} uri - if true return string represention of uri
+   * @return {string} path or uri as string
+   */
+  toString(uri) {
+    if (uri) return this.ctx.toString();
+    return Array.isArray(this._path) ? this._path.join('/') : '';
+  }
+}
 
 /**
  * Class to manage query part of URL
  */
-var Query = function Query(f, ctx) {
-  if ( ctx === void 0 ) ctx = {};
+class Query {
+  /**
+   * @param {string} f - query string
+   * @param {object} ctx - context of uri instance
+   * @return {instance} for chaining
+   */
+  constructor(f, ctx = {}) {
+    Object.assign(this, ctx);
+    this.ctx = ctx;
+    this.set(f);
+    return this;
+  }
 
-  Object.assign(this, ctx);
-  this.ctx = ctx;
-  this.set(f);
-  return this;
-};
+  /**
+   * Add a query string
+   * @param {object} obj {name: 'value'}
+   * @return {instance} for chaining
+   */
+  add(obj = {}) {
+    this._query = this._convert(obj, this._query[0], this._query[1]);
+    return this.ctx;
+  }
 
-/**
- * Add a query string
- * @param {object} obj {name: 'value'}
- * @return {instance} for chaining
- */
-Query.prototype.add = function add (obj) {
-    if ( obj === void 0 ) obj = {};
+  /**
+   * Remove the query string
+   * @return {instance} for chaining
+   */
+  clear() {
+    this._query = [[], []];
+    return this.ctx;
+  }
 
-  this._query = this._convert(obj, this._query[0], this._query[1]);
-  return this.ctx;
-};
-
-/**
- * Remove the query string
- * @return {instance} for chaining
- */
-Query.prototype.clear = function clear () {
-  this._query = [[], []];
-  return this.ctx;
-};
-
-Query.prototype._convert = function _convert (obj, p, q) {
-    if ( p === void 0 ) p = [];
-    if ( q === void 0 ) q = [];
-
-  for (var key in obj) {
-    if (Array.isArray(obj[key])) {
-      for (var i = 0; i < obj[key].length; i++) {
-        var val = obj[key][i];
+  _convert(obj, p = [], q = []) {
+    for (let key in obj) {
+      if (Array.isArray(obj[key])) {
+        for (let i = 0; i < obj[key].length; i++) {
+          let val = obj[key][i];
+          p.push(key);
+          q.push(val);
+        }
+      } else if(obj[key]) {
         p.push(key);
-        q.push(val);
+        q.push(obj[key]);
       }
-    } else if(obj[key]) {
-      p.push(key);
-      q.push(obj[key]);
     }
+    return [p, q];
   }
-  return [p, q];
-};
 
-/**
- * Get the query string
- * @return {array} representing the query string
- */
-Query.prototype.get = function get () {
-  var dict = {};
-  var obj = this._query;
+  /**
+   * Get the query string
+   * @return {array} representing the query string
+   */
+  get() {
+    let dict = {};
+    let obj = this._query;
 
-  for (var i = 0; i < obj[0].length; i++) {
-    var k = obj[0][i];
-    var v = obj[1][i];
-    if (dict[k]) {
-      dict[k].push(v);
-    } else {
-      dict[k] = [v];
+    for (let i = 0; i < obj[0].length; i++) {
+      let k = obj[0][i];
+      let v = obj[1][i];
+      if (dict[k]) {
+        dict[k].push(v);
+      } else {
+        dict[k] = [v];
+      }
     }
+    return dict;
   }
-  return dict;
-};
 
-Query.prototype.getUrlTemplateQuery = function getUrlTemplateQuery () {
-  return this._urlTemplateQueryString;
-};
+  getUrlTemplateQuery() {
+    return this._urlTemplateQueryString;
+  }
 
-/**
- * Merge with the query string - replaces query string values if they exist
- * @param {object} obj {name: 'value'}
- * @return {instance} for chaining
- */
-Query.prototype.merge = function merge (obj) {
-  var p = this._query[0];
-  var q = this._query[1];
-  for (var key in obj) {
-    var kset = false;
+  /**
+   * Merge with the query string - replaces query string values if they exist
+   * @param {object} obj {name: 'value'}
+   * @return {instance} for chaining
+   */
+  merge(obj) {
+    let p = this._query[0];
+    let q = this._query[1];
+    for (let key in obj) {
+      let kset = false;
 
-    for(var i=0; i < p.length; i++) {
-      var xKey = p[i];
-      if(key === xKey) {
-        if(kset) {
-          p.splice(i,1);
-          q.splice(i,1);
-          continue;
+      for(let i=0; i < p.length; i++) {
+        let xKey = p[i];
+        if(key === xKey) {
+          if(kset) {
+            p.splice(i,1);
+            q.splice(i,1);
+            continue;
+          }
+          if (Array.isArray(obj[key])) {
+            q[i] = obj[key].shift();
+          } else if (typeof obj[key] === 'undefined' || obj[key] === null) {
+            p.splice(i, 1);
+            q.splice(i, 1);
+            delete obj[key];
+          } else {
+            q[i] = obj[key];
+            delete obj[key];
+          }
+          kset = true;
         }
-        if (Array.isArray(obj[key])) {
-          q[i] = obj[key].shift();
-        } else if (typeof obj[key] === 'undefined' || obj[key] === null) {
-          p.splice(i, 1);
-          q.splice(i, 1);
-          delete obj[key];
-        } else {
-          q[i] = obj[key];
-          delete obj[key];
+      }
+    }
+    this._query = this._convert(obj, this._query[0], this._query[1]);
+    return this.ctx;
+  }
+
+  _parse(q = '') {
+    let struct = [[], []];
+    let pairs = q.split(/&|;/);
+
+    for (let j = 0; j < pairs.length; j++) {
+      let name, value, pair = pairs[j], nPair = pair.match(this.qRegEx);
+
+      if(nPair && typeof nPair[nPair.length -1] !== 'undefined') {
+        nPair.shift();
+        for (let i = 0; i < nPair.length; i++) {
+          let p = nPair[i];
+          struct[i].push(decodeURIComponent(p.replace('+', ' ', 'g')));
         }
-        kset = true;
       }
     }
+    return struct;
   }
-  this._query = this._convert(obj, this._query[0], this._query[1]);
-  return this.ctx;
-};
 
-Query.prototype._parse = function _parse (q) {
-    var this$1 = this;
-    if ( q === void 0 ) q = '';
+  /**
+   * Set with the query string - replaces existing query string
+   * @param {obj} or {string} ...q
+   * @return {instance} for chaining
+   */
+  set(...q) {
+    let args = [...q];
 
-  var struct = [[], []];
-  var pairs = q.split(/&|;/);
-
-  for (var j = 0; j < pairs.length; j++) {
-    var name = (void 0), value = (void 0), pair = pairs[j], nPair = pair.match(this$1.qRegEx);
-
-    if(nPair && typeof nPair[nPair.length -1] !== 'undefined') {
-      nPair.shift();
-      for (var i = 0; i < nPair.length; i++) {
-        var p = nPair[i];
-        struct[i].push(decodeURIComponent(p.replace('+', ' ', 'g')));
+    if (args.length === 1) {
+      if (typeof args[0] === 'object') {
+        this._query = this._convert(args[0]);
+      } else {
+        this._query = this._parse(args[0]);
       }
-    }
-  }
-  return struct;
-};
-
-/**
- * Set with the query string - replaces existing query string
- * @param {obj} or {string} ...q
- * @return {instance} for chaining
- */
-Query.prototype.set = function set () {
-    var q = [], len = arguments.length;
-    while ( len-- ) q[ len ] = arguments[ len ];
-
-  var args = [].concat( q );
-
-  if (args.length === 1) {
-    if (typeof args[0] === 'object') {
-      this._query = this._convert(args[0]);
+    } else if (args.length === 0) {
+      this.clear();
     } else {
-      this._query = this._parse(args[0]);
+      let obj = {};
+      obj[args[0]] = args[1];
+      this.merge(obj);
     }
-  } else if (args.length === 0) {
-    this.clear();
-  } else {
-    var obj = {};
-    obj[args[0]] = args[1];
-    this.merge(obj);
+    return this.ctx;
   }
-  return this.ctx;
-};
 
-/**
- * Set the url template query string vale
- * @param {string} url-template query string
- * @return {instance} for chaining
- */
-Query.prototype.setUrlTemplateQuery = function setUrlTemplateQuery (s) {
-  this._urlTemplateQueryString = s;
-};
-
-/**
- * Get string representatio of the path or the uri
- * @param {boolen} uri - if true return string represention of uri
- * @return {string} query or uri as string
- */
-Query.prototype.toString = function toString (uri) {
-  if (uri) { return this.ctx.toString(); }
-  var pairs = [];
-  var n = this._query[0];
-  var v = this._query[1];
-
-  for(var i = 0; i < n.length; i++) {
-    pairs.push(encodeURIComponent(n[i]) + '=' + encodeURIComponent(v[i]));
+  /**
+   * Set the url template query string vale
+   * @param {string} url-template query string
+   * @return {instance} for chaining
+   */
+  setUrlTemplateQuery(s) {
+    this._urlTemplateQueryString = s;
   }
-  return pairs.join('&');
- };
+
+  /**
+   * Get string representatio of the path or the uri
+   * @param {boolen} uri - if true return string represention of uri
+   * @return {string} query or uri as string
+   */
+  toString(uri) {
+    if (uri) return this.ctx.toString();
+    let pairs = [];
+    let n = this._query[0];
+    let v = this._query[1];
+
+    for(let i = 0; i < n.length; i++) {
+      pairs.push(encodeURIComponent(n[i]) + '=' + encodeURIComponent(v[i]));
+    }
+    return pairs.join('&');
+   }
+}
 
 /**
  * Class to make it easier to build strings
  */
-var StringBuilder = function StringBuilder(string) {
-  if (!string || typeof string === 'undefined') { this.string = String(""); }
-  else { this.string = String(string); }
-};
-
-/**
- * Return full string
- * @return {string} assembled string
- */
-StringBuilder.prototype.toString = function toString () {
-  return this.string;
-};
-
-/**
- * Append a string to an existing string
- * @param {string} val - string to be appended
- * @return {instance} for chaining
- */
-StringBuilder.prototype.append = function append (val) {
-  this.string += val;
-  return this;
-};
-
-/**
- * Insert a string to an existing string
- * @param {integer} pos - position at which to insert value
- * @param {string} val - string to be inserted
- * @return {instance} for chaining
- */
-StringBuilder.prototype.insert = function insert (pos, val) {
-  var left = this.string.slice(0, pos);
-  var right = this.string.slice(pos);
-  this.string = left + val + right;
-  return this;
-};
-
-var TinyUri = function TinyUri(uri) {
-  this.uriRegEx = /^(([^:\/?#]+):)?(\/\/([^\/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/;
-  this.authRegEx = /^([^\@]+)\@/;
-  this.portRegEx = /:(\d+)$/;
-  this.qRegEx = /^([^=]+)(?:=(.*))?$/;
-  this.urlTempQueryRegEx = /\{\?(.*?)\}/;
-  return this.parse(uri);
-};
-
-/**
- * @param {string} authority - username password part of URL
- * @return {instance} - returns Uri instance for chaining
- */
-TinyUri.prototype.authority = function authority (authority) {
-    if ( authority === void 0 ) authority = '';
-
-  if (authority !== '') {
-    var auth = authority.match(this.authRegEx);
-    this._authority = authority;
-    if (auth) {
-      authority = authority.replace(this.authRegEx, '');
-      this.userInfo(auth[1]);
-    }
-    var port = authority.match(this.portRegEx);
-    if(port) {
-      authority = authority.replace(this.portRegEx, '');
-      this.port(port[1]);
-    }
-    this.host(authority.replace('{', ''));
-    return this;
-  } else {
-    var userinfo = this.userInfo();
-    if (userinfo) { authority = userinfo + '@'; }
-    authority += this.host();
-    var port$1 = this.port();
-    if (port$1) { authority += ':' + port$1; }
-    return authority;
+class StringBuilder {
+  /**
+   * @param {string} string - starting string (optional)
+   * @return {instance} for chaining
+   */
+  constructor(string) {
+    if (!string || typeof string === 'undefined') this.string = String("");
+    else this.string = String(string);
   }
-};
 
-/**
- * @param {string} f - string representation of fragment
- * @return {instance} - returns Uri instance for chaining
- */
-TinyUri.prototype.fragment = function fragment (f) {
-    if ( f === void 0 ) f = '';
+  /**
+   * Return full string
+   * @return {string} assembled string
+   */
+  toString() {
+    return this.string;
+  }
 
-  return this.gs(f, '_fragment');
-};
-
-TinyUri.prototype.gs = function gs (val, tar, fn) {
-  if (typeof val !== 'undefined') {
-    this[tar] = val;
+  /**
+   * Append a string to an existing string
+   * @param {string} val - string to be appended
+   * @return {instance} for chaining
+   */
+  append(val) {
+    this.string += val;
     return this;
   }
-  return fn ? fn(this[tar]) : this[tar] ? this[tar] : '';
-};
 
-/**
- * @param {string} f - string representation of host
- * @return {instance} - returns Uri instance for chaining
- */
-TinyUri.prototype.host = function host (f) {
-  return this.gs(f, '_host');
-};
+  /**
+   * Insert a string to an existing string
+   * @param {integer} pos - position at which to insert value
+   * @param {string} val - string to be inserted
+   * @return {instance} for chaining
+   */
+  insert(pos, val) {
+    let left = this.string.slice(0, pos);
+    let right = this.string.slice(pos);
+    this.string = left + val + right;
+    return this;
+  }
 
-/**
- * @param {string} uri - URL
- * @return {instance} - returns Uri instance for chaining
- */
-TinyUri.prototype.parse = function parse (uri) {
-  var f = uri ? uri.match(this.uriRegEx) : [];
-  var t = uri ? uri.match(this.urlTempQueryRegEx) : [];
-  this.scheme(f[2]);
-  this.authority(f[4]);
-  this.path = new Path(f[5].replace(/{$/, ''), this);
-  this.fragment(f[9]);
-  this.query = new Query(f[7], this);
-  if (t) { this.query.setUrlTemplateQuery(t[1]); }
-  return this;
-};
-
-/**
- * @param {string} f - port part of URL
- * @return {instance} - returns Uri instance for chaining
- */
-TinyUri.prototype.port = function port (f) {
-  return this.gs(f, '_port');
-};
-
-/**
- * @param {string} f - protocol part of URL
- * @return {instance} - returns Uri instance for chaining
- */
-TinyUri.prototype.protocol = function protocol (f) {
-  return this.scheme.toLowerCase();
-};
-
-/**
- * @param {string} f - protocol scheme
- * @return {instance} - returns Uri instance for chaining
- */
-TinyUri.prototype.scheme = function scheme (f) {
-  return this.gs(f, '_scheme');
-};
-
-/**
- * @param {string} f - user info part of URL
- * @return {instance} - returns Uri instance for chaining
- */
-TinyUri.prototype.userInfo = function userInfo (f) {
-  return this.gs(f, '_userinfo', function (r) {
-    return r ? encodeURI(r) : r;
-  });
-};
-
-/**
- * @return {string} - returns string URL
- */
-TinyUri.prototype.toString = function toString () {
-  var q = this.query.toString();
-  var p = this.path.toString();
-  var f = this.fragment();
-  var s = this.scheme();
-  var str = new StringBuilder();
-  var retStr = str.append(s ? s + '://' : "")
-    .append(this.authority())
-    .append('/').append(p)
-    .append(q !== '' ? '?' : '')
-    .append(q)
-    .toString()
-    .replace('/?', '?')
-    .replace(/\/$/, '');
-  return retStr;
-};
-
-TinyUri.clone = function clone (uri) {
-  return new TinyUri(uri.toString());
-};
-
-function makeRequest(url, term, queryParams) {
-  if ( queryParams === void 0 ) queryParams = {};
-
-  var searchParam = queryParams.searchParam;
-  var requestParams = {};
-  if (searchParam) { requestParams[searchParam] = term; }
-  Object.assign(requestParams, queryParams.otherParams);
-
-  var _url = new TinyUri(url).query.set(requestParams).toString();
-  return fetch(_url).then(function (resp) { return resp.json(); });
 }
 
-var StringBuilder$2 = function StringBuilder(string) {
-  if ( string === void 0 ) string = '';
-
-  this.string = String(string);
-};
-StringBuilder$2.prototype.toString = function toString () {
-  return this.string;
-};
-StringBuilder$2.prototype.append = function append (val) {
-  this.string += val;
-  return this;
-};
-StringBuilder$2.prototype.insert = function insert (pos, val) {
-  var left = this.string.slice(0, pos);
-  var right = this.string.slice(pos);
-  this.string = left + val + right;
-  return this;
-};
-
-var STypeahead = (function (HTMLElement) {
-  function STypeahead() {
-    HTMLElement.call(this);
-    this.attachShadow({mode: 'open'});
+/**
+ * Uri - manipulate URLs
+ */
+class TinyUri {
+  /**
+   * @param {string} uri - a URI string
+   * @return {instance} - return Uri instance for chaining
+   */
+  constructor(uri) {
+    this.uriRegEx = /^(([^:\/?#]+):)?(\/\/([^\/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/;
+    this.authRegEx = /^([^\@]+)\@/;
+    this.portRegEx = /:(\d+)$/;
+    this.qRegEx = /^([^=]+)(?:=(.*))?$/;
+    this.urlTempQueryRegEx = /\{\?(.*?)\}/;
+    return this.parse(uri);
   }
 
-  if ( HTMLElement ) STypeahead.__proto__ = HTMLElement;
-  STypeahead.prototype = Object.create( HTMLElement && HTMLElement.prototype );
-  STypeahead.prototype.constructor = STypeahead;
+  /**
+   * @param {string} authority - username password part of URL
+   * @return {instance} - returns Uri instance for chaining
+   */
+  authority(authority = '') {
+    if (authority !== '') {
+      let auth = authority.match(this.authRegEx);
+      this._authority = authority;
+      if (auth) {
+        authority = authority.replace(this.authRegEx, '');
+        this.userInfo(auth[1]);
+      }
+      let port = authority.match(this.portRegEx);
+      if(port) {
+        authority = authority.replace(this.portRegEx, '');
+        this.port(port[1]);
+      }
+      this.host(authority.replace('{', ''));
+      return this;
+    } else {
+      let userinfo = this.userInfo();
+      if (userinfo) authority = userinfo + '@';
+      authority += this.host();
+      let port = this.port();
+      if (port) authority += ':' + port;
+      return authority;
+    }
+  }
 
-  var prototypeAccessors = { options: {} };
-  var staticAccessors = { observedAttributes: {} };
+  /**
+   * @param {string} f - string representation of fragment
+   * @return {instance} - returns Uri instance for chaining
+   */
+  fragment(f = '') {
+    return this.gs(f, '_fragment');
+  }
+
+  gs(val, tar, fn) {
+    if (typeof val !== 'undefined') {
+      this[tar] = val;
+      return this;
+    }
+    return fn ? fn(this[tar]) : this[tar] ? this[tar] : '';
+  }
+
+  /**
+   * @param {string} f - string representation of host
+   * @return {instance} - returns Uri instance for chaining
+   */
+  host(f) {
+    return this.gs(f, '_host');
+  }
+
+  /**
+   * @param {string} uri - URL
+   * @return {instance} - returns Uri instance for chaining
+   */
+  parse(uri) {
+    let f = uri ? uri.match(this.uriRegEx) : [];
+    let t = uri ? uri.match(this.urlTempQueryRegEx) : [];
+    this.scheme(f[2]);
+    this.authority(f[4]);
+    this.path = new Path(f[5].replace(/{$/, ''), this);
+    this.fragment(f[9]);
+    this.query = new Query(f[7], this);
+    if (t) this.query.setUrlTemplateQuery(t[1]);
+    return this;
+  }
+
+  /**
+   * @param {string} f - port part of URL
+   * @return {instance} - returns Uri instance for chaining
+   */
+  port(f) {
+    return this.gs(f, '_port');
+  }
+
+  /**
+   * @param {string} f - protocol part of URL
+   * @return {instance} - returns Uri instance for chaining
+   */
+  protocol(f) {
+    return this.scheme.toLowerCase();
+  }
+
+  /**
+   * @param {string} f - protocol scheme
+   * @return {instance} - returns Uri instance for chaining
+   */
+  scheme(f) {
+    return this.gs(f, '_scheme');
+  }
+
+  /**
+   * @param {string} f - user info part of URL
+   * @return {instance} - returns Uri instance for chaining
+   */
+  userInfo(f) {
+    return this.gs(f, '_userinfo', (r) => {
+      return r ? encodeURI(r) : r;
+    });
+  }
+
+  /**
+   * @return {string} - returns string URL
+   */
+  toString() {
+    let q = this.query.toString();
+    let p = this.path.toString();
+    let f = this.fragment();
+    let s = this.scheme();
+    let str = new StringBuilder();
+    let retStr = str.append(s ? s + '://' : "")
+      .append(this.authority())
+      .append('/').append(p)
+      .append(q !== '' ? '?' : '')
+      .append(q)
+      .toString()
+      .replace('/?', '?')
+      .replace(/\/$/, '');
+    return retStr;
+  }
+
+  static clone(uri) {
+    return new TinyUri(uri.toString());
+  }
+
+}
+
+/*
+ * makeRequest
+ * url: the source url for the AJAX request
+ * term: the search terms (object) to be added as a query to the source url, such
+ * as {query: 'foo'}
+ * callback: a function to be called if the AJAX request is successful
+ * _this: optional this used by the callback function
+ * Builds a URL with the search term and makes an AJAX request.
+ * returns promise.
+ */
+function makeRequest(url, term, queryParams = {}) {
+  let searchParam = queryParams.searchParam;
+  let requestParams = {};
+  if (searchParam) requestParams[searchParam] = term;
+  Object.assign(requestParams, queryParams.otherParams);
+
+  let _url = new TinyUri(url).query.set(requestParams).toString();
+  return fetch(_url).then((resp) => resp.json());
+}
+
+class StringBuilder$1 {
+  constructor(string = '') {
+    this.string = String(string);
+  }
+  toString() {
+    return this.string;
+  }
+  append(val) {
+    this.string += val;
+    return this;
+  }
+  insert(pos, val) {
+    let left = this.string.slice(0, pos);
+    let right = this.string.slice(pos);
+    this.string = left + val + right;
+    return this;
+  }
+}
+
+class STypeahead extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({mode: 'open'});
+  }
 
 /**
  * Creates <li>s for each item in the items list and once they have all
@@ -624,20 +691,17 @@ var STypeahead = (function (HTMLElement) {
  * @param {[type]} dataObjects [a list of objects corresponding to the labels]
  * @returns {[Void]} []
  */
- STypeahead.prototype.addItems = function addItems (items, dataObjects) {
-   var this$1 = this;
-   if ( items === void 0 ) items = [];
+ addItems(items = [], dataObjects) {
+   let bs = '<b>';
+   let be = '</b>';
+   let fragment = document.createDocumentFragment();
+   let li;
 
-   var bs = '<b>';
-   var be = '</b>';
-   var fragment = document.createDocumentFragment();
-   var li;
-
-   items.forEach(function (item, i) {
+   items.forEach((item, i) => {
      li = document.createElement('li');
-     var idx = item.toLowerCase().indexOf(this$1.currentValue.toLowerCase());
-     var len = this$1.currentValue.length;
-     var str = new StringBuilder$2(item).insert(idx, bs).insert(idx + len + 3, be).toString();
+     let idx = item.toLowerCase().indexOf(this.currentValue.toLowerCase());
+     let len = this.currentValue.length;
+     let str = new StringBuilder$1(item).insert(idx, bs).insert(idx + len + 3, be).toString();
      li.innerHTML = str;
      fragment.appendChild(li);
    });
@@ -650,50 +714,44 @@ var STypeahead = (function (HTMLElement) {
    this.setData(dataObjects);
 
    this.bindItems();
- };
+ }
 
-  STypeahead.prototype.attributeChangedCallback = function attributeChangedCallback (name, oVal, nVal) {
-    var this$1 = this;
-
+  attributeChangedCallback(name, oVal, nVal) {
     if (nVal && nVal !== '' && nVal !== oVal) {
       if (name === 'options' && this._options) {
         Object.assign(this._options, isJson(nVal) ? JSON.parse(nVal) : {});
         if (this._options.list && typeof this._options.list[0] === 'object') {
-          if (!this._options.propertyInObjectArrayToUse) { throw new Error('propertyInObjectArrayToUse required if list contains objects'); }
-          this._options.list = this._options.list.map(function (li) { return li[this$1._options.propertyInObjectArrayToUse]; });
+          if (!this._options.propertyInObjectArrayToUse) throw new Error('propertyInObjectArrayToUse required if list contains objects');
+          this._options.list = this._options.list.map((li) => li[this._options.propertyInObjectArrayToUse]);
         }
-        if (this._options.placeholder) { this.input.placeholder = this._options.placeholder; }
+        if (this._options.placeholder) this.input.placeholder = this._options.placeholder;
         this.createDropdown();
       }
     }
-  };
+  }
 
   /*
    * bindItems
    * Bind click and hover events to each list item.
    */
-  STypeahead.prototype.bindItems = function bindItems () {
-    var this$1 = this;
-
-    var items = this.getDropdownItems();
-    [].forEach.call(items, function (item, i) {
-      this$1.registerEventListener(item, 'mousedown', this$1.triggerSelect.bind(this$1), this$1.clickHandlers);
-      this$1.registerEventListener(item, 'mouseover', this$1.triggerHover.bind(this$1, i), this$1.hoverHandlers);
+  bindItems() {
+    let items = this.getDropdownItems();
+    [].forEach.call(items, (item, i) => {
+      this.registerEventListener(item, 'mousedown', this.triggerSelect.bind(this), this.clickHandlers);
+      this.registerEventListener(item, 'mouseover', this.triggerHover.bind(this, i), this.hoverHandlers);
     });
-  };
+  }
 
   /*
    * clearData
    * Empty the DataStore of all data corresponding to the current list items.
    */
-  STypeahead.prototype.clearData = function clearData () {
-    var this$1 = this;
-
-    var items = this.getDropdownItems();
-    [].forEach.call(items, function (item, i) {
-      this$1.dataStore.remove(items[i]);
+  clearData() {
+    let items = this.getDropdownItems();
+    [].forEach.call(items, (item, i) => {
+      this.dataStore.remove(items[i]);
     });
-  };
+  }
 
   /*
    * clearDropdown
@@ -701,7 +759,7 @@ var STypeahead = (function (HTMLElement) {
    * Before removing all of the list items, all event listeners are unbound
    * and all corresponding data is cleared.
    */
-  STypeahead.prototype.clearDropdown = function clearDropdown () {
+  clearDropdown() {
     // Reset index back to -1
     this.setIndex();
 
@@ -713,20 +771,20 @@ var STypeahead = (function (HTMLElement) {
 
     // Completely remove all of the elements
     this.dropdown.innerHTML = '';
-  };
+  }
 
-  STypeahead.prototype.clearSearch = function clearSearch () {
+  clearSearch() {
     this.clearDropdown();
     this.input.value = '';
-  };
+  }
 
   /*
    * createDropdown
    * Setup the initial dropdown.
    */
-  STypeahead.prototype.createDropdown = function createDropdown () {
+  createDropdown() {
     // This returns an object of {dropdown: DOM, wrapper: DOM}
-    var list = generateList();
+    let list = generateList();
 
     // Grab the unordered list
     this.dropdown = list.dropdown;
@@ -738,12 +796,10 @@ var STypeahead = (function (HTMLElement) {
 
     // Append it after the input
     appendAfter(this.input, list.wrapper);
-  };
+  }
 
-  STypeahead.prototype.connectedCallback = function connectedCallback () {
-    var this$1 = this;
-
-    this.shadowRoot.innerHTML = "<style>" + css + "</style><div><input /></div>";
+  connectedCallback() {
+    this.shadowRoot.innerHTML = `<style>${css}</style><div><input /></div>`;
     this.input = this.shadowRoot.querySelector('input');
     this._options = this._options || {};
     this.activeClass = 'highlight';
@@ -754,47 +810,42 @@ var STypeahead = (function (HTMLElement) {
     this.datastore = new DataStore();
     this.actionFunctions = {
       // Enter key
-      13: function () { return this$1.triggerSelect(this$1.getDropdownItems()[this$1.index], true); },
+      13: () => this.triggerSelect(this.getDropdownItems()[this.index], true),
       // Escape key
-      27: function () { return this$1.clearSearch(); },
+      27: () => this.clearSearch(),
       // Up arrow
-      38: function () { return this$1.updateIndex(true); },
+      38: () => this.updateIndex(true),
       // Down arrow
-      40: function () { return this$1.updateIndex(); }
+      40: () => this.updateIndex()
     };
-  };
+  }
 
   /*
    * deselectAllItems
    * Grabs all of the current list items and deactivates them.
    */
-  STypeahead.prototype.deselectAllItems = function deselectAllItems () {
-    var this$1 = this;
-
-    var items = this.getDropdownItems();
-    items.forEach(function (item) {
-      removeClass(item, this$1.activeClass);
-      removeClass(item, this$1.hoverClass);
+  deselectAllItems() {
+    let items = this.getDropdownItems();
+    items.forEach((item) => {
+      removeClass(item, this.activeClass);
+      removeClass(item, this.hoverClass);
     });
-  };
+  }
 
   /*
    * deselectItems
    * items: a list of items to be deactivated.
    */
-  STypeahead.prototype.deselectItems = function deselectItems (items) {
-    var this$1 = this;
-    if ( items === void 0 ) items = [];
-
-    [].forEach.call(items, function (item, i) {
-      removeClass(item, this$1.activeClass);
-      removeClass(item, this$1.hoverClass);
+  deselectItems(items = []) {
+    [].forEach.call(items, (item, i) => {
+      removeClass(item, this.activeClass);
+      removeClass(item, this.hoverClass);
     });
-  };
+  }
 
-  STypeahead.prototype.displayDropdown = function displayDropdown () {
+  displayDropdown() {
     this.dropdown.style.display = 'block';
-  };
+  }
 
   /*
    * getActionFromKey
@@ -802,37 +853,37 @@ var STypeahead = (function (HTMLElement) {
    * If the key is an action key (such as up arrow or enter), the function corresponding to this key is returned.
    * Returns undefined if the key pressed does not correspond to an action.
    */
-  STypeahead.prototype.getActionFromKey = function getActionFromKey (ev) {
-    if (!ev) { return; }
-    var charCode = typeof ev.which === "number" ? ev.which : ev.keyCode;
+  getActionFromKey(ev) {
+    if (!ev) return;
+    let charCode = typeof ev.which === "number" ? ev.which : ev.keyCode;
 
     // Determine if this character is an action character
-    var action = this.actionFunctions[charCode.toString()];
-    if (action) { return action; }
+    let action = this.actionFunctions[charCode.toString()];
+    if (action) return action;
 
     return;
-  };
+  }
 
-  STypeahead.prototype.getActiveItems = function getActiveItems () {
+  getActiveItems() {
     return this.dropdown.getElementsByClassName(this.activeClass);
-  };
+  }
 
-  STypeahead.prototype.getDropdownItems = function getDropdownItems () {
-    var dropdownItems = this.dropdown.querySelectorAll('li');
+  getDropdownItems() {
+    let dropdownItems = this.dropdown.querySelectorAll('li');
     return dropdownItems;
-  };
+  }
 
-  STypeahead.prototype.getHoverItems = function getHoverItems () {
+  getHoverItems() {
     return this.dropdown.getElementsByClassName(this.hoverClass);
-  };
+  }
 
   /*
    * getInputValue
    * Return the current input value.
    */
-  STypeahead.prototype.getInputValue = function getInputValue () {
+  getInputValue() {
     return this.input.value;
-  };
+  }
 
   /**
    * [Finds item in list and returns it]
@@ -840,41 +891,37 @@ var STypeahead = (function (HTMLElement) {
    * @param  {[Array]} list [HTMCollection of dropdown items]
    * @return {[String]}     [Item from the list or undefined if not found]
    */
-  STypeahead.prototype.getItemFromList = function getItemFromList (val, list) {
-    var this$1 = this;
-
+  getItemFromList(val, list) {
     if (this._options.list) {
-      var i = this._options.list.find(function (item) { return item.toLowerCase() === val.toLowerCase(); });
+      let i = this._options.list.find((item) => item.toLowerCase() === val.toLowerCase());
       return Promise.resolve(i ? i : '');
     }
     return makeRequest(this._options.source, val, this._options.queryParams)
-      .then(function (matches) {
-        var match = matches.find(function (m) { return val === m[this$1._options.propertyInObjectArrayToUse]; });
-        return match ? match[this$1._options.propertyInObjectArrayToUse] : null;
+      .then((matches) => {
+        let match = matches.find((m) => val === m[this._options.propertyInObjectArrayToUse]);
+        return match ? match[this._options.propertyInObjectArrayToUse] : null;
       });
-  };
+  }
 
-  STypeahead.prototype.hideDropdown = function hideDropdown () {
+  hideDropdown() {
     this.dropdown.style.display = 'none';
-  };
+  }
 
   /*
    * onInputChange
    * When the value of the input field has changed make an AJAX request from the source
    * and update the dropdown with the returned values.
    */
-  STypeahead.prototype.onInputChange = function onInputChange () {
-    var this$1 = this;
-
+  onInputChange() {
     if (this._options.list) {
       // When searching from a static list, find the matches and update the dropdown with these matches
-      var matches = findMatches(this.currentValue, this._options.list);
+      let matches = findMatches(this.currentValue, this._options.list);
       this.updateDropdown(matches);
     } else if (this._options.source) {
       // Otherwise, hook up to a server call and update the dropdown with the matches
-      makeRequest(this._options.source, this.currentValue, this._options.queryParams).then(function (matches) {
-        matches = this$1._options.propertyInObjectArrayToUse ? matches.map(function (m) { return m[this$1._options.propertyInObjectArrayToUse]; }) : matches;
-        this$1.updateDropdown(matches);
+      makeRequest(this._options.source, this.currentValue, this._options.queryParams).then((matches) => {
+        matches = this._options.propertyInObjectArrayToUse ? matches.map((m) => m[this._options.propertyInObjectArrayToUse]) : matches;
+        this.updateDropdown(matches);
         // if (Array.isArray(matches)) {
         //   let labels = this.parseMatches(matches);
         //   this.updateDropdown(labels, matches);
@@ -883,30 +930,28 @@ var STypeahead = (function (HTMLElement) {
         // }
       });
     }
-  };
+  }
 
-  STypeahead.prototype.onBlurHandler = function onBlurHandler (e) {
-    var this$1 = this;
-
+  onBlurHandler(e) {
     e.stopPropagation();
-    setTimeout(function () {
-      if (this$1.options.requireSelectionFromList) {
-        this$1.getItemFromList(this$1.input.value)
-          .then(function (itemFromList) {
-            if (itemFromList) { this$1.input.value = itemFromList; }
-            else { this$1.input.value = ''; }
+    setTimeout(() => {
+      if (this.options.requireSelectionFromList) {
+        this.getItemFromList(this.input.value)
+          .then((itemFromList) => {
+            if (itemFromList) this.input.value = itemFromList;
+            else this.input.value = '';
           });
       }
-      this$1.currentValue = this$1.input.value;
-      this$1.clearDropdown();
+      this.currentValue = this.input.value;
+      this.clearDropdown();
     }, 10);
-  };
+  }
 
-  STypeahead.prototype.onKeyupHandler = function onKeyupHandler (e) {
+  onKeyupHandler(e) {
     e.preventDefault();
-    var value;
-    var action = this.getActionFromKey(e);
-    if (action) { action.call(this); }
+    let value;
+    let action = this.getActionFromKey(e);
+    if (action) action.call(this);
     else {
       value = this.getInputValue();
       if (value !== this.currentValue) {
@@ -914,7 +959,7 @@ var STypeahead = (function (HTMLElement) {
         this.onInputChange.call(this);
       }
     }
-  };
+  }
 
   /**
    * Takes a list of objects and returns a list containing one of the properties from the objects.
@@ -922,12 +967,9 @@ var STypeahead = (function (HTMLElement) {
    * @param  {Array}  [matches=[]] [ a list of objects that need to be parsed for one property]
    * @return {[Array]}  [description]
    */
-  STypeahead.prototype.parseMatches = function parseMatches (matches) {
-    var this$1 = this;
-    if ( matches === void 0 ) matches = [];
-
-    return matches.map(function (match) { return match[this$1._options.property]; });
-  };
+  parseMatches(matches = []) {
+    return matches.map((match) => match[this._options.property]);
+  }
 
   /**
    * [registerEventListener description]
@@ -937,21 +979,21 @@ var STypeahead = (function (HTMLElement) {
    * @param  {[Array]} list [the list to add the function handler to for unbinding]
    * @return {[Void]} [description]
    */
-  STypeahead.prototype.registerEventListener = function registerEventListener (element, ev, handler, list) {
-      if (!element) { return; }
+  registerEventListener(element, ev, handler, list) {
+      if (!element) return;
       element.addEventListener(ev, handler, false);
       list.push(handler);
-  };
+  }
 
   /*
    * resetHandlers
    * Empty out event handlers.
    * Called when all items are unbound.
    */
-  STypeahead.prototype.resetHandlers = function resetHandlers () {
+  resetHandlers() {
       this.clickHandlers = [];
       this.hoverHandlers = [];
-  };
+  }
 
   /*
    * setData
@@ -959,28 +1001,28 @@ var STypeahead = (function (HTMLElement) {
    * Stores the passed in objects onto the dropdown list items.
    * Uses the DataStore functionality provided in DataStore.js.
    */
-  STypeahead.prototype.setData = function setData (dataObjects) {
-    if (!dataObjects || dataObjects.length === 0) { return; }
+  setData(dataObjects) {
+    if (!dataObjects || dataObjects.length === 0) return;
 
-    var items = this.getDropdownItems();
-    items.forEach(function (item, i) {
+    let items = this.getDropdownItems();
+    items.forEach((item, i) => {
       dataStore.set(item, 'data', dataObjects[i]);
     });
-  };
+  }
 
   /*
    * selectItem
    * index: the index of the item to set as active or inactive
    * deselect: a boolean of whether to set the item as active or inactive
    */
-  STypeahead.prototype.selectItem = function selectItem (index, deselect) {
-    var items = this.getDropdownItems();
+  selectItem(index, deselect) {
+    let items = this.getDropdownItems();
 
     if (items.length > 0 && items[index]) {
-      if (deselect) { removeClass(items[index], this.activeClass); }
-      else { addClass(items[index], this.activeClass); }
+      if (deselect) removeClass(items[index], this.activeClass);
+      else addClass(items[index], this.activeClass);
     }
-  };
+  }
 
   /*
    * setIndex
@@ -989,11 +1031,11 @@ var STypeahead = (function (HTMLElement) {
    * If no index is passed in then the index is reset back to -1.
    * If an out of bounds index is passed then nothing is changed.
    */
-  STypeahead.prototype.setIndex = function setIndex (idx) {
+  setIndex(idx) {
     // Make sure we stay within bounds again
-    if (idx < -1 || idx > this.getDropdownItems().length - 1) { return; }
+    if (idx < -1 || idx > this.getDropdownItems().length - 1) return;
     this.index = idx || idx === 0 ? idx : -1;
-  };
+  }
 
   /*
    * triggerHover
@@ -1001,17 +1043,17 @@ var STypeahead = (function (HTMLElement) {
    * and all other active elements are deactived.
    * Call the optional onHover function after.
    */
-  STypeahead.prototype.triggerHover = function triggerHover (index, evt) {
-    var item = evt.target;
+  triggerHover(index, evt) {
+    let item = evt.target;
     this.deselectItems(this.getHoverItems());
     addClass(item, this.hoverClass);
 
     this.setIndex(index);
     if (typeof this._options.onHover === 'function') {
-      var data = dataStore.get(item, 'data');
+      let data = dataStore.get(item, 'data');
       this._options.onHover(item, data);
     }
-  };
+  }
 
   /*
    * triggerSelect
@@ -1019,11 +1061,8 @@ var STypeahead = (function (HTMLElement) {
    * and all other active elements are deactivated.
    * Call the optional onSelect function after.
    */
-  STypeahead.prototype.triggerSelect = function triggerSelect (ev, clearDropdown) {
-    var this$1 = this;
-    if ( clearDropdown === void 0 ) clearDropdown = false;
-
-    var item;
+  triggerSelect(ev, clearDropdown = false) {
+    let item;
     if (ev) {
       if (ev.target) {
         ev.stopPropagation();
@@ -1039,25 +1078,25 @@ var STypeahead = (function (HTMLElement) {
       addClass(item, this.activeClass);
     } else if (this.options.requireSelectionFromList) {
       this.getItemFromList(this.currentValue)
-        .then(function (listItem) {
-          if (listItem) { this$1.input.value = listItem; }
+        .then((listItem) => {
+          if (listItem) this.input.value = listItem;
         });
     }
     this.deselectItems(this.getDropdownItems());
     document.dispatchEvent(new CustomEvent('selectionChangedEvent', {detail: {id: this._options.uid, value: this.input.value}}));
-    if (clearDropdown) { this.clearDropdown(); }
-  };
+    if (clearDropdown) this.clearDropdown();
+  }
 
   /*
    * updateIndex
    * decrement: boolean of whether to increment or decrement the index
    * Updates the index and activates the list item for that updated index.
    */
-  STypeahead.prototype.updateIndex = function updateIndex (decrement) {
+  updateIndex(decrement) {
       // Make sure we stay within bounds
-    var length = this.getDropdownItems().length - 1;
-    if (decrement && this.index === 0) { return; }
-    if (!decrement && this.index === length) { return; }
+    let length = this.getDropdownItems().length - 1;
+    if (decrement && this.index === 0) return;
+    if (!decrement && this.index === length) return;
 
     // TODO: Is this really going to be faster than doing deselectAllItems? where we just remove it
     // from the items we have saved?
@@ -1065,26 +1104,24 @@ var STypeahead = (function (HTMLElement) {
     // it slower
     this.deselectItems(this.getActiveItems());
 
-    if (decrement) { this.index--; }
-    else { this.index++; }
+    if (decrement) this.index--;
+    else this.index++;
 
     this.selectItem(this.index);
-  };
+  }
 
   /*
    * unbindItems
    * Unbind all events from all list items
    */
-  STypeahead.prototype.unbindItems = function unbindItems () {
-    var this$1 = this;
-
-    var items = this.getDropdownItems();
-    [].forEach.call(items, function (item, i) {
-      items[i].removeEventListener('click', this$1.clickHandlers[i], false);
-      items[i].removeEventListener('mouseover', this$1.hoverHandlers[i], false);
+  unbindItems() {
+    let items = this.getDropdownItems();
+    [].forEach.call(items, (item, i) => {
+      items[i].removeEventListener('click', this.clickHandlers[i], false);
+      items[i].removeEventListener('mouseover', this.hoverHandlers[i], false);
     });
     this.resetHandlers();
-  };
+  }
 
   /**
    * [updateDropdown mpties out the dropdown and appends a new set of list items if they exist.]
@@ -1092,7 +1129,7 @@ var STypeahead = (function (HTMLElement) {
    * @param  {[Array]} dataObjects  [objects to be stored within the list items]
    * @return {[Void]}               [nothing]
    */
-  STypeahead.prototype.updateDropdown = function updateDropdown (labels, dataObjects) {
+  updateDropdown(labels, dataObjects) {
       // Always clear the dropdown with a new search
       this.clearDropdown();
 
@@ -1106,26 +1143,21 @@ var STypeahead = (function (HTMLElement) {
       // and display the dropdown
       this.addItems(labels, dataObjects);
       this.displayDropdown();
-  };
+  }
 
-  prototypeAccessors.options.get = function () {
+  get options() {
     return this._options;
-  };
+  }
 
-  prototypeAccessors.options.set = function (options) {
-    if (typeof options === 'object') { this.setAttribute('options', JSON.stringify(options)); }
-    else { this.setAttribute('options', options); }
-  };
+  set options(options) {
+    if (typeof options === 'object') this.setAttribute('options', JSON.stringify(options));
+    else this.setAttribute('options', options);
+  }
 
-  staticAccessors.observedAttributes.get = function () {
+  static get observedAttributes() {
     return ['options'];
-  };
-
-  Object.defineProperties( STypeahead.prototype, prototypeAccessors );
-  Object.defineProperties( STypeahead, staticAccessors );
-
-  return STypeahead;
-}(HTMLElement));
+  }
+}
 
 customElements.define('s-typeahead', STypeahead);
 
