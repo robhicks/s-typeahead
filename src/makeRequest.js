@@ -1,4 +1,4 @@
-import TinyUri from '../node_modules/tiny-uri/src/TinyUri';
+import TinyUri from '../node_modules/tiny-uri/src/TinyUri.js';
 /*
  * makeRequest
  * url: the source url for the AJAX request

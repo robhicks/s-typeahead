@@ -1,12 +1,12 @@
-import {addClass, hasClass, removeClass} from '../node_modules/s-utilities/src/manageClasses';
-import appendAfter from '../node_modules/s-utilities/src/appendAfter';
+import {addClass, hasClass, removeClass} from '../node_modules/s-utilities/src/manageClasses.js';
+import appendAfter from '../node_modules/s-utilities/src/appendAfter.js';
 import css from './s-typeahead-css.js';
-import DataStore from '../node_modules/s-utilities/src/DataStore';
-import findMatches from './findMatches';
-import generateList from './generateList';
+import DataStore from '../node_modules/s-utilities/src/DataStore.js';
+import findMatches from './findMatches.js';
+import generateList from './generateList.js';
 import isJson from '../node_modules/s-utilities/src/isJson.js';
-import makeRequest from './makeRequest';
-import StringBuilder from '../node_modules/s-utilities/src/StringBuilder';
+import makeRequest from './makeRequest.js';
+import StringBuilder from '../node_modules/s-utilities/src/StringBuilder.js';
 
 class STypeahead extends HTMLElement {
   constructor() {
