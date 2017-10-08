@@ -39,7 +39,7 @@ export default [
   {
     input,
     output: {
-      file: path.resolve(root, 'dist', 's-typeahead.es.js'),
+      file: path.resolve(root, 'dist', 's-typeahead.mjs'),
       format: 'es'
     }
   }
