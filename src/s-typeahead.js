@@ -60,6 +60,7 @@ class STypeahead extends HTMLElement {
           if (!this._options.propertyInObjectArrayToUse) throw new Error('propertyInObjectArrayToUse required if list contains objects');
           this._options.list = this._options.list.map((li) => li[this._options.propertyInObjectArrayToUse]);
         }
+        if (this._options.initialValue) this.input.value = this.options.initialValue;
         if (this._options.placeholder) this.input.placeholder = this._options.placeholder;
         this.createDropdown();
       }
@@ -422,7 +423,7 @@ class STypeahead extends HTMLElement {
         });
     }
     this.deselectItems(this.getDropdownItems());
-    document.dispatchEvent(new CustomEvent('selectionChangedEvent', {detail: {id: this._options.uid, value: this.input.value}}));
+    document.dispatchEvent(new CustomEvent('EVENT:s-typeahead:selectionChangedEvent', {detail: {id: this._options.uid, value: this.input.value}}));
     if (clearDropdown) this.clearDropdown();
   }
 

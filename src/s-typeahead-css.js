@@ -8,12 +8,12 @@ export default `
 input {
   box-sizing: border-box;
   border: var(--border, 1px solid #ddd);
-  border-top-right-radius: var(--radius, 3px);
-  border-top-left-radius: var(--radius, 3px);
+  border-top-right-radius: var(--radius, 5px);
+  border-top-left-radius: var(--radius, 5px);
   color: var(--input-text-color, #444);
-  font-size: var(--font-size, 20px);
+  font-size: var(--font-size, 13px);
   outline: 0;
-  padding: var(--input-padding, 10px);
+  padding: var(--input-padding, 6px);
   margin: 0;
   width: 100%;
 }

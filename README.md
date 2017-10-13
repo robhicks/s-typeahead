@@ -44,7 +44,8 @@ component.options = {
 
 - uid: (optional) Unique identified for the component. If provided, it is used in selectionChangedEvent, providing a way to identify a component when multiple components are used.
 - list: A list of items to use for matching input. The list can be a flat array or an object array.
-- placeholder: (optional) Text to be used as the placeholder for the text input.
+- placeholder: (optional) Text to be used as the placeholder for the text input.\
+- initial value: the initial value of the input.
 - propertyInObjectArrayToUse: If the list is an object array, the name of the property within the array to use for searching.
 - requireSelectionFromList: Whether to force the user to select one of the choices in the list.
 - source: url to use to fetch list. If list is provided, source is not. The source must return a JSON response of either a flat array or an object array, and propertyInObjectArrayToUse must be provided if an object array is returned.

@@ -33,12 +33,12 @@ var css = `
 input {
   box-sizing: border-box;
   border: var(--border, 1px solid #ddd);
-  border-top-right-radius: var(--radius, 3px);
-  border-top-left-radius: var(--radius, 3px);
+  border-top-right-radius: var(--radius, 5px);
+  border-top-left-radius: var(--radius, 5px);
   color: var(--input-text-color, #444);
-  font-size: var(--font-size, 20px);
+  font-size: var(--font-size, 13px);
   outline: 0;
-  padding: var(--input-padding, 10px);
+  padding: var(--input-padding, 6px);
   margin: 0;
   width: 100%;
 }
@@ -490,9 +490,6 @@ class StringBuilder {
 
 }
 
-/**
- * Uri - manipulate URLs
- */
 class TinyUri {
   /**
    * @param {string} uri - a URI string
@@ -636,16 +633,6 @@ class TinyUri {
 
 }
 
-/*
- * makeRequest
- * url: the source url for the AJAX request
- * term: the search terms (object) to be added as a query to the source url, such
- * as {query: 'foo'}
- * callback: a function to be called if the AJAX request is successful
- * _this: optional this used by the callback function
- * Builds a URL with the search term and makes an AJAX request.
- * returns promise.
- */
 function makeRequest(url, term, queryParams = {}) {
   let searchParam = queryParams.searchParam;
   let requestParams = {};
@@ -724,6 +711,7 @@ class STypeahead extends HTMLElement {
           if (!this._options.propertyInObjectArrayToUse) throw new Error('propertyInObjectArrayToUse required if list contains objects');
           this._options.list = this._options.list.map((li) => li[this._options.propertyInObjectArrayToUse]);
         }
+        if (this._options.initialValue) this.input.value = this.options.initialValue;
         if (this._options.placeholder) this.input.placeholder = this._options.placeholder;
         this.createDropdown();
       }
@@ -1083,7 +1071,7 @@ class STypeahead extends HTMLElement {
         });
     }
     this.deselectItems(this.getDropdownItems());
-    document.dispatchEvent(new CustomEvent('selectionChangedEvent', {detail: {id: this._options.uid, value: this.input.value}}));
+    document.dispatchEvent(new CustomEvent('EVENT:s-typeahead:selectionChangedEvent', {detail: {id: this._options.uid, value: this.input.value}}));
     if (clearDropdown) this.clearDropdown();
   }
 
