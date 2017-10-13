@@ -53,9 +53,9 @@ class STypeahead extends HTMLElement {
  }
 
   attributeChangedCallback(name, oVal, nVal) {
-    if (nVal && nVal !== '' && nVal !== oVal) {
+    if (nVal && !(/\{\{|_hyper/).test(nVal) && nVal !== '' && nVal !== oVal) {
       if (name === 'options' && this._options) {
-        Object.assign(this._options, isJson(nVal) ? JSON.parse(nVal) : {});
+        Object.assign(this._options, isJson(nVal) && nVal !== JSON.stringify(this._options) ? JSON.parse(nVal) : {});
         if (this._options.list && typeof this._options.list[0] === 'object') {
           if (!this._options.propertyInObjectArrayToUse) throw new Error('propertyInObjectArrayToUse required if list contains objects');
           this._options.list = this._options.list.map((li) => li[this._options.propertyInObjectArrayToUse]);
