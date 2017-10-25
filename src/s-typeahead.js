@@ -14,6 +14,13 @@ class STypeahead extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({mode: 'open'});
+    this.shadowRoot.innerHTML = `<style>${css}</style><div><input /></div>`;
+    this.input = this.shadowRoot.querySelector('input');
+    this.onKeyupHandlerBound = false;
+    this.onBlurHandlerBound = false;
+    this.activeClass = 'highlight';
+    this.hoverClass = 'hover';
+    this._options = {};
   }
 
 /**
@@ -43,7 +50,6 @@ class STypeahead extends HTMLElement {
    });
 
    this.dropdown.appendChild(fragment.cloneNode(true));
-
    // setData checks whether dataObjects is undefined or not so no need to check here.
    // The items must be appended to the DOM first before the data can be set because the
    // property that the DataStore attaches to the DOM element is wiped out when the elements are appended.
@@ -60,8 +66,8 @@ class STypeahead extends HTMLElement {
           if (!this._options.propertyInObjectArrayToUse) throw new Error('propertyInObjectArrayToUse required if list contains objects');
           this._options.list = this._options.list.map((li) => li[this._options.propertyInObjectArrayToUse]);
         }
-        if (this._options.initialValue) this.input.value = this.options.initialValue;
-        if (this._options.placeholder) this.input.placeholder = this._options.placeholder;
+        if (this._options.initialValue && this.input) this.input.value = this.options.initialValue;
+        if (this._options.placeholder && this.input) this.input.placeholder = this._options.placeholder;
         this.createDropdown();
       }
     }
@@ -123,6 +129,22 @@ class STypeahead extends HTMLElement {
    * Setup the initial dropdown.
    */
   createDropdown() {
+    this.input = this.shadowRoot.querySelector('input');
+    if (!this.onKeyupHandlerBound) this.input.onkeyup = this.onKeyupHandler.bind(this);
+    // this.input.onfocus = this.onFocusHandler.bind(this);
+    if (!this.onBlurHandlerBound) this.input.onblur = this.onBlurHandler.bind(this);
+    this.datastore = this.datastore || new DataStore();
+    this.actionFunctions = this.actionFunctions || {
+      // Enter key
+      13: () => this.triggerSelect(this.getDropdownItems()[this.index], true),
+      // Escape key
+      27: () => this.clearSearch(),
+      // Up arrow
+      38: () => this.updateIndex(true),
+      // Down arrow
+      40: () => this.updateIndex()
+    };
+
     // This returns an object of {dropdown: DOM, wrapper: DOM}
     let list = generateList();
 
@@ -139,25 +161,7 @@ class STypeahead extends HTMLElement {
   }
 
   connectedCallback() {
-    this.shadowRoot.innerHTML = `<style>${css}</style><div><input /></div>`;
-    this.input = this.shadowRoot.querySelector('input');
-    this._options = this._options || {};
-    this.activeClass = 'highlight';
-    this.hoverClass = 'hover';
-    this.input.onkeyup = this.onKeyupHandler.bind(this);
-    // this.input.onfocus = this.onFocusHandler.bind(this);
-    this.input.onblur = this.onBlurHandler.bind(this);
-    this.datastore = new DataStore();
-    this.actionFunctions = {
-      // Enter key
-      13: () => this.triggerSelect(this.getDropdownItems()[this.index], true),
-      // Escape key
-      27: () => this.clearSearch(),
-      // Up arrow
-      38: () => this.updateIndex(true),
-      // Down arrow
-      40: () => this.updateIndex()
-    };
+
   }
 
   /*

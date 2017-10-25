@@ -608,6 +608,13 @@ var STypeahead = (function (HTMLElement) {
   function STypeahead() {
     HTMLElement.call(this);
     this.attachShadow({mode: 'open'});
+    this.shadowRoot.innerHTML = "<style>" + css + "</style><div><input /></div>";
+    this.input = this.shadowRoot.querySelector('input');
+    this.onKeyupHandlerBound = false;
+    this.onBlurHandlerBound = false;
+    this.activeClass = 'highlight';
+    this.hoverClass = 'hover';
+    this._options = {};
   }
 
   if ( HTMLElement ) STypeahead.__proto__ = HTMLElement;
@@ -646,7 +653,6 @@ var STypeahead = (function (HTMLElement) {
    });
 
    this.dropdown.appendChild(fragment.cloneNode(true));
-
    // setData checks whether dataObjects is undefined or not so no need to check here.
    // The items must be appended to the DOM first before the data can be set because the
    // property that the DataStore attaches to the DOM element is wiped out when the elements are appended.
@@ -665,8 +671,8 @@ var STypeahead = (function (HTMLElement) {
           if (!this._options.propertyInObjectArrayToUse) { throw new Error('propertyInObjectArrayToUse required if list contains objects'); }
           this._options.list = this._options.list.map(function (li) { return li[this$1._options.propertyInObjectArrayToUse]; });
         }
-        if (this._options.initialValue) { this.input.value = this.options.initialValue; }
-        if (this._options.placeholder) { this.input.placeholder = this._options.placeholder; }
+        if (this._options.initialValue && this.input) { this.input.value = this.options.initialValue; }
+        if (this._options.placeholder && this.input) { this.input.placeholder = this._options.placeholder; }
         this.createDropdown();
       }
     }
@@ -729,6 +735,24 @@ var STypeahead = (function (HTMLElement) {
    * Setup the initial dropdown.
    */
   STypeahead.prototype.createDropdown = function createDropdown () {
+    var this$1 = this;
+
+    this.input = this.shadowRoot.querySelector('input');
+    if (!this.onKeyupHandlerBound) { this.input.onkeyup = this.onKeyupHandler.bind(this); }
+    // this.input.onfocus = this.onFocusHandler.bind(this);
+    if (!this.onBlurHandlerBound) { this.input.onblur = this.onBlurHandler.bind(this); }
+    this.datastore = this.datastore || new DataStore();
+    this.actionFunctions = this.actionFunctions || {
+      // Enter key
+      13: function () { return this$1.triggerSelect(this$1.getDropdownItems()[this$1.index], true); },
+      // Escape key
+      27: function () { return this$1.clearSearch(); },
+      // Up arrow
+      38: function () { return this$1.updateIndex(true); },
+      // Down arrow
+      40: function () { return this$1.updateIndex(); }
+    };
+
     // This returns an object of {dropdown: DOM, wrapper: DOM}
     var list = generateList();
 
@@ -745,27 +769,7 @@ var STypeahead = (function (HTMLElement) {
   };
 
   STypeahead.prototype.connectedCallback = function connectedCallback () {
-    var this$1 = this;
 
-    this.shadowRoot.innerHTML = "<style>" + css + "</style><div><input /></div>";
-    this.input = this.shadowRoot.querySelector('input');
-    this._options = this._options || {};
-    this.activeClass = 'highlight';
-    this.hoverClass = 'hover';
-    this.input.onkeyup = this.onKeyupHandler.bind(this);
-    // this.input.onfocus = this.onFocusHandler.bind(this);
-    this.input.onblur = this.onBlurHandler.bind(this);
-    this.datastore = new DataStore();
-    this.actionFunctions = {
-      // Enter key
-      13: function () { return this$1.triggerSelect(this$1.getDropdownItems()[this$1.index], true); },
-      // Escape key
-      27: function () { return this$1.clearSearch(); },
-      // Up arrow
-      38: function () { return this$1.updateIndex(true); },
-      // Down arrow
-      40: function () { return this$1.updateIndex(); }
-    };
   };
 
   /*

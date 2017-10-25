@@ -1,6 +1,6 @@
 {
   "name": "s-typeahead",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Native v1 web typeahead component",
   "dependencies": {
     "@webcomponents/webcomponentsjs": "git+https://github.com/webcomponents/webcomponentsjs.git",
