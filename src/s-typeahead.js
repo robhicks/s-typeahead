@@ -1,5 +1,3 @@
-
-
 import {addClass, hasClass, removeClass} from '../node_modules/s-utilities/src/manageClasses.js';
 import appendAfter from '../node_modules/s-utilities/src/appendAfter.js';
 import css from './s-typeahead-css.js';
@@ -7,7 +5,6 @@ import DataStore from '../node_modules/s-utilities/src/DataStore.js';
 import findMatches from './findMatches.js';
 import generateList from './generateList.js';
 import isJson from '../node_modules/s-utilities/src/isJson.js';
-import makeRequest from './makeRequest.js';
 import StringBuilder from '../node_modules/s-utilities/src/StringBuilder.js';
 
 class STypeahead extends HTMLElement {
@@ -44,7 +41,7 @@ class STypeahead extends HTMLElement {
      li = document.createElement('li');
      let idx = item.toLowerCase().indexOf(this.currentValue.toLowerCase());
      let len = this.currentValue.length;
-     let str = new StringBuilder(item).insert(idx, bs).insert(idx + len + 3, be).toString();
+     let str = idx !== -1 ? new StringBuilder(item).insert(idx, bs).insert(idx + len + 3, be).toString() : item;
      li.innerHTML = str;
      fragment.appendChild(li);
    });
@@ -240,11 +237,11 @@ class STypeahead extends HTMLElement {
       let i = this._options.list.find((item) => item.toLowerCase() === val.toLowerCase());
       return Promise.resolve(i ? i : '');
     }
-    return makeRequest(this._options.source, val, this._options.queryParams)
-      .then((matches) => {
-        let match = matches.find((m) => val === m[this._options.propertyInObjectArrayToUse]);
-        return match ? match[this._options.propertyInObjectArrayToUse] : null;
-      });
+    if (!this._makeRequest) return;
+    return this._makeRequest(val).then(matches => {
+      let match = matches.find((m) => val === m[this._options.propertyInObjectArrayToUse]);
+      return match ? Promise.resolve(match[this._options.propertyInObjectArrayToUse]) : Promise.resolve(null);
+    });
   }
 
   hideDropdown() {
@@ -261,17 +258,12 @@ class STypeahead extends HTMLElement {
       // When searching from a static list, find the matches and update the dropdown with these matches
       let matches = findMatches(this.currentValue, this._options.list);
       this.updateDropdown(matches);
-    } else if (this._options.source) {
+    } else {
       // Otherwise, hook up to a server call and update the dropdown with the matches
-      makeRequest(this._options.source, this.currentValue, this._options.queryParams).then((matches) => {
+      if (!this._makeRequest) return;
+      this._makeRequest(this.currentValue).then(matches => {
         matches = this._options.propertyInObjectArrayToUse ? matches.map((m) => m[this._options.propertyInObjectArrayToUse]) : matches;
         this.updateDropdown(matches);
-        // if (Array.isArray(matches)) {
-        //   let labels = this.parseMatches(matches);
-        //   this.updateDropdown(labels, matches);
-        // } else {
-        //   this.updateDropdown(matches);
-        // }
       });
     }
   }
@@ -494,6 +486,7 @@ class STypeahead extends HTMLElement {
   }
 
   set options(options) {
+    if (typeof options.makeRequest === 'function') this._makeRequest = options.makeRequest;
     if (typeof options === 'object') this.setAttribute('options', JSON.stringify(options));
     else this.setAttribute('options', options);
   }

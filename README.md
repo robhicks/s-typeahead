@@ -23,19 +23,16 @@ component.options = {
   propertyInObjectArrayToUse: 'name',
   requireSelectionFromList: true
 };
-// Use with a source url
+// Use with a function to get data. The function must be return a promise, and options
+// must be set using a property.
 let component = document.querySelector('s-typeahead');
 component.options = {
   propertyInObjectArrayToUse: 'id',
-  queryParams: {
-    searchParam: 'id',
-    otherParams: {
-      limit: 10,
-      type: 'starts'
-    }
-  },
   requireSelectionFromList: true,
-  source: 'https://beta.familysearch.org/indexing/admin-new/labelids/search'
+  makeRequest: (val) => {
+    let url = '/path?q=val';
+    return fetch(url).then(response => response.json());
+  }
 };
 ```
 ## Options
@@ -48,8 +45,7 @@ component.options = {
 - initial value: the initial value of the input.
 - propertyInObjectArrayToUse: If the list is an object array, the name of the property within the array to use for searching.
 - requireSelectionFromList: Whether to force the user to select one of the choices in the list.
-- source: url to use to fetch list. If list is provided, source is not. The source must return a JSON response of either a flat array or an object array, and propertyInObjectArrayToUse must be provided if an object array is returned.
-- queryParams: an object containing query parameters to be used with the source url, and the query parameter to be used for searching for matches. The object needs to be in the following form:
+- makeRequest: function returning a promise to fetch list. If list is provided, makeRequest is not. makeRequest must return a promise with a JSON response of either a flat array or an object array, and propertyInObjectArrayToUse must be provided if an object array is returned.
 
 ```Javascript
 {

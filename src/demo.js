@@ -1,3 +1,5 @@
+import makeRequest from './makeRequest.js';
+
 var states = [
   "Alabama",
   "Alaska",
@@ -64,17 +66,10 @@ window.addEventListener('DOMContentLoaded', function() {
   var component2 = document.querySelector('#bar');
 
   let options2 = {
-    queryParams: {
-      searchParam: 'q',
-      otherParams: {
-        _page: 1,
-        _limit: 10
-      }
-    },
     placeholder: 'US States',
     propertyInObjectArrayToUse: 'name',
     requireSelectionFromList: true,
-    source: 'http://localhost:3000/states',
+    makeRequest,
     uid: 'bar'
   };
 
@@ -89,7 +84,13 @@ window.addEventListener('DOMContentLoaded', function() {
   component2.options = options2;
 
   angular.module('Test', []).controller('MainCtrl', function($scope) {
-    $scope.options = options2;
+    $scope.options = {
+      list: states2,
+      placeholder: 'US States',
+      propertyInObjectArrayToUse: 'name',
+      requireSelectionFromList: true,
+      uid: 'foo'
+    };
   });
 
   angular.element(function() {
