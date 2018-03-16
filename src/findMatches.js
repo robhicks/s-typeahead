@@ -8,6 +8,7 @@
  */
 export default function findMatches(term, items = []) {
   if (term === "") return [];
+  term = term.replace(/[-\/\\^$*+?.()|[\]{}]/g, '');
   return items.sort().filter((item, i) => new RegExp('^' + term, 'i').test(item));
   // return items.sort().map((item, i) => item.match(new RegExp('\\b' + term, 'gi')));
 }

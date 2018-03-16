@@ -142,6 +142,7 @@ class DataStore {
  */
 function findMatches(term, items = []) {
   if (term === "") return [];
+  term = term.replace(/[-\/\\^$*+?.()|[\]{}]/g, '');
   return items.sort().filter((item, i) => new RegExp('^' + term, 'i').test(item));
   // return items.sort().map((item, i) => item.match(new RegExp('\\b' + term, 'gi')));
 }
@@ -263,6 +264,7 @@ class STypeahead extends HTMLElement {
   bindItems() {
     let items = this.getDropdownItems();
     let wrapper = this.shadowRoot;
+
     [].forEach.call(items, (item, i) => {
       this.registerEventListener(item, 'mousedown', this.triggerSelect.bind(this), this.clickHandlers);
       this.registerEventListener(item, 'mouseover', this.triggerHover.bind(this, i), this.hoverHandlers);

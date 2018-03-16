@@ -89,6 +89,7 @@ function findMatches(term, items) {
   if ( items === void 0 ) items = [];
 
   if (term === "") { return []; }
+  term = term.replace(/[-\/\\^$*+?.()|[\]{}]/g, '');
   return items.sort().filter(function (item, i) { return new RegExp('^' + term, 'i').test(item); });
   // return items.sort().map((item, i) => item.match(new RegExp('\\b' + term, 'gi')));
 }
@@ -224,6 +225,7 @@ var STypeahead = (function (HTMLElement) {
 
     var items = this.getDropdownItems();
     var wrapper = this.shadowRoot;
+
     [].forEach.call(items, function (item, i) {
       this$1.registerEventListener(item, 'mousedown', this$1.triggerSelect.bind(this$1), this$1.clickHandlers);
       this$1.registerEventListener(item, 'mouseover', this$1.triggerHover.bind(this$1, i), this$1.hoverHandlers);
