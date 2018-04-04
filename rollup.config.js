@@ -14,32 +14,46 @@ let plugins = [
   string({include: 'src/**/*.css'}),
   buble()
 ];
-let globals = [];
+let globals = {
+  's-utilities': 'SUtilities'
+};
+let external = ['s-utilities'];
 
 export default [
   {
+    external,
     input,
     plugins,
-    globals,
-    name: 'STypeahead',
     output: {
+      name: 'STypeahead',
       file: path.resolve(root, 'dist', 's-typeahead.iife.js'),
-      format: 'iife'
+      format: 'iife',
+      globals
     }
   },
   {
+    external,
     input,
     plugins,
-    globals,
     output: {
       file: path.resolve(root, 'dist', 's-typeahead.cjs.js'),
       format: 'cjs'
     }
   },
   {
+    external,
     input,
     output: {
       file: path.resolve(root, 'dist', 's-typeahead.mjs'),
+      format: 'es'
+    }
+  },
+  {
+    external,
+    input,
+    plugins: [nodeResolve()],
+    output: {
+      file: path.resolve(root, 'dist', 's-typeahead.test.mjs'),
       format: 'es'
     }
   }

@@ -1,27 +1,4 @@
-function hasClass(el, name) {
-  return el.className.match(new RegExp("(\\s|^)" + name + "(\\s|$)")) === null ? false : true;
-}
-
-function addClass(el, name) {
-  if (!hasClass(el, name)) {
-    el.className += (el.className ? ' ' : '') + name;
-  }
-}
-
-function removeClass(el, name) {
-  if (hasClass(el, name)) {
-    el.className = el.className.replace(new RegExp('(\\s|^)' + name + '(\\s|$)'), ' ').replace(/^\s+|\s+$/g, '');
-  }
-}
-
-function appendAfter(el, sibling) {
-  if (el.nextSibling) {
-      el.parentNode.insertBefore(sibling, el.nextSibling);
-      return;
-  }
-
-  el.parentNode.appendChild(sibling);
-}
+import { DataStore, StringBuilder, addClass, appendAfter, isJson, removeClass } from 's-utilities';
 
 var css = `
 :host {
@@ -82,56 +59,6 @@ li.hover {
 
 `;
 
-class DataStore {
-  constructor() {
-    this.storeMap = {};
-  }
-
-  // this.get(el, "hi");
-  get(element, key) {
-    return this.getStore(element)[key] || null;
-  }
-
-  getAll() {
-    console.log("this.storeMap", this.storeMap);
-  }
-
-  // this.set(el, "hi", {"number": 4}
-  set(element, key, value) {
-    if (!value) return;
-    this.getStore(element)[key] = value;
-    return value;
-  }
-
-  // this.remove(el);
-  // this.remove(el, "hi");
-  remove(element, key) {
-    if (key) {
-      let store = this.getStore(element);
-      if (store[key]) delete store[key];
-    } else {
-      let elementId = element[this.storeId];
-      if (elementId) {
-        delete this.storeMap[elementId];
-        delete element[this.storeId];
-      }
-    }
-  }
-
-  getStore(element) {
-    let storeId = this.storeId;
-    let storeMap = this.storeMap;
-    let elementId = element[storeId];
-
-    if (!elementId) {
-      elementId = element[storeId] = this.uid++;
-      storeMap[elementId] = {};
-    }
-
-    return storeMap[elementId];
-  }
-}
-
 /*
  * findMatches
  * term: a string to be matched against
@@ -164,35 +91,6 @@ function generateList() {
   div.appendChild(ul);
 
   return {wrapper: div, dropdown: ul};
-}
-
-function isJson(str) {
-  try {
-    let json = JSON.parse(str);
-    return json;
-  } catch (e) {
-    return false;
-  }
-}
-
-class StringBuilder {
-  constructor(string = '') {
-    this.string = String(string);
-  }
-  toString() {
-    return this.string;
-  }
-  append(val) {
-    this.string += val;
-    return this;
-  }
-  insert(pos, val) {
-    let length = this.string.length;
-    let left = this.string.slice(0, pos);
-    let right = this.string.slice(pos);
-    this.string = left + val + right;
-    return this;
-  }
 }
 
 class STypeahead extends HTMLElement {
@@ -263,8 +161,6 @@ class STypeahead extends HTMLElement {
    */
   bindItems() {
     let items = this.getDropdownItems();
-    let wrapper = this.shadowRoot;
-
     [].forEach.call(items, (item, i) => {
       this.registerEventListener(item, 'mousedown', this.triggerSelect.bind(this), this.clickHandlers);
       this.registerEventListener(item, 'mouseover', this.triggerHover.bind(this, i), this.hoverHandlers);
