@@ -1,6 +1,6 @@
 {
   "name": "s-typeahead",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "Native v1 web typeahead component",
   "dependencies": {},
   "devDependencies": {
@@ -49,7 +49,6 @@
     "dev-tests": "dev-tests",
     "demo": "node server.js",
     "karma": "karma start karma.conf.js",
-    "postinstall": "npm-run-all build",
     "test": "tests"
   }
 }
