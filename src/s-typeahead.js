@@ -415,7 +415,7 @@ class STypeahead extends HTMLElement {
         });
     }
     this.deselectItems(this.getDropdownItems());
-    document.dispatchEvent(new CustomEvent('EVENT:s-typeahead:selectionChangedEvent', {detail: {id: this._options.uid, value: this.input.value}}));
+    document.dispatchEvent(new CustomEvent(`EVENT:s-typeahead:selectionChangedEvent${this._options.uid}`, {detail: {id: this._options.uid, value: this.input.value}}));
     if (clearDropdown) this.clearDropdown();
   }
 

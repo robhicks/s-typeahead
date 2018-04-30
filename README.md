@@ -71,10 +71,10 @@ The component exposes the follow css custom properties:
 
 ## Events
 
-Fires a selectionChangedEvent when the selection changes. If options.uid is provided, the event detail includes it:
+Fires a selectionChangedEvent when the selection changes. If options.uid is provided, the event signature and detail include it:
 ```Javascript
 // assuming options.uid = 'foo';
-document.addEventListener('foo:selectionChangedEvent', (evt) => {
+document.addEventListener(`foo:selectionChangedEvent${options.uid}`, (evt) => {
   console.log("evt", evt)
   let uid = evt.detail.uid;
   let value = evt.detail.value;
