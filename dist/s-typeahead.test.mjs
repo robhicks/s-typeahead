@@ -1,4 +1,157 @@
-import { DataStore, StringBuilder, addClass, appendAfter, isJson, removeClass } from 's-utilities';
+Promise.allSettled = (promises) =>
+  Promise.all(promises.map((promise) =>
+    promise
+    .then((value) => ({
+      state: 'fulfilled',
+      value
+    }))
+    .catch((reason) => ({
+      state: 'rejected',
+      reason
+    }))
+  ));
+
+Promise.series = (array) => {
+  let results = [];
+  return array.reduce(function(p, item) {
+    return p.then(function() {
+      return item.then(function(data) {
+        results.push(data);
+        return results;
+      });
+    });
+  }, Promise.resolve());
+};
+
+// Promise.series = tasks => tasks.reduce((p, task) => p.then(task));
+
+/**
+ * Checks to see if an element has a class
+ * @param  {HTMLElement}  el   Element to check
+ * @param  {String}  name class name to check
+ * @return {Boolean}      True if the element has the class, otherwise false.
+ */
+function hasClass(el, name) {
+  if (!el) return false;
+  return !el.className || el.className.match(new RegExp("(\\s|^)" + name + "(\\s|$)")) === null ? false : true;
+}
+
+/**
+ * Adds a class to an element
+ * @param {HTMLElement}  el   Element
+ * @param {[String]} name class to add
+ * @return {Void}
+ */
+function addClass(el, name) {
+  if (!hasClass(el, name) && el) {
+    el.className += (el.className ? ' ' : '') + name;
+  }
+}
+
+/**
+ * Adds a slist of classes to an element
+ * @param {HTMLElement}  el   Element
+ * @param {[String]} names classes to add (space delimited)
+ * @return {Void}
+ */
+function removeClass(el, name) {
+  if (el && hasClass(el, name)) {
+    el.className = el.className.replace(new RegExp('(\\s|^)' + name + '(\\s|$)'), ' ').replace(/^\s+|\s+$/g, '');
+  }
+}
+
+/**
+ * Toggles a class on an element
+ * @param {HTMLElement}  el   Element
+ * @param {[String]} name class to add and remove
+ * @return {Void}
+ */
+function appendAfter(el, sibling) {
+  if (el.nextSibling) {
+      el.parentNode.insertBefore(sibling, el.nextSibling);
+      return;
+  }
+
+  el.parentNode.appendChild(sibling);
+}
+
+class DataStore {
+  constructor() {
+    this.storeMap = {};
+  }
+
+  // this.get(el, "hi");
+  get(element, key) {
+    return this.getStore(element)[key] || null;
+  }
+
+  getAll() {
+    console.log("this.storeMap", this.storeMap);
+  }
+
+  // this.set(el, "hi", {"number": 4}
+  set(element, key, value) {
+    if (!value) return;
+    this.getStore(element)[key] = value;
+    return value;
+  }
+
+  // this.remove(el);
+  // this.remove(el, "hi");
+  remove(element, key) {
+    if (key) {
+      let store = this.getStore(element);
+      if (store[key]) delete store[key];
+    } else {
+      let elementId = element[this.storeId];
+      if (elementId) {
+        delete this.storeMap[elementId];
+        delete element[this.storeId];
+      }
+    }
+  }
+
+  getStore(element) {
+    let storeId = this.storeId;
+    let storeMap = this.storeMap;
+    let elementId = element[storeId];
+
+    if (!elementId) {
+      elementId = element[storeId] = this.uid++;
+      storeMap[elementId] = {};
+    }
+
+    return storeMap[elementId];
+  }
+}
+
+function isJson(str) {
+  try {
+    let json = JSON.parse(str);
+    return json;
+  } catch (e) {
+    return false;
+  }
+}
+
+class StringBuilder {
+  constructor(string = '') {
+    this.string = String(string);
+  }
+  toString() {
+    return this.string;
+  }
+  append(val) {
+    this.string += val;
+    return this;
+  }
+  insert(pos, val) {
+    let left = this.string.slice(0, pos);
+    let right = this.string.slice(pos);
+    this.string = left + val + right;
+    return this;
+  }
+}
 
 var css = `
 :host {
@@ -479,7 +632,17 @@ class STypeahead extends HTMLElement {
    * and all other active elements are deactivated.
    * Call the optional onSelect function after.
    */
-  triggerSelect(ev, clearDropdown = false) {
+  triggerSelect(ev, clearDropdown = true) {
+    // if (this.options.requireSelectionFromList) {
+    //   this.getItemFromList(ev.target.textContent)
+    //     .then(listItem => this.input.value = listItem);
+    // } else {
+    //   let item = ev.target;
+    //   ev.stopPropagation();
+    //   this.input.value = item.textContent;
+    //   removeClass(item, this.hoverClass);
+    //   addClass(item, this.activeClass);
+    // }
     let item;
     if (ev) {
       if (ev.target) {
@@ -501,6 +664,7 @@ class STypeahead extends HTMLElement {
         });
     }
     this.deselectItems(this.getDropdownItems());
+    console.log('this.input.value', this.input.value);
     document.dispatchEvent(new CustomEvent(`EVENT:s-typeahead:selectionChangedEvent${this._options.uid}`, {detail: {id: this._options.uid, value: this.input.value}}));
     if (clearDropdown) this.clearDropdown();
   }

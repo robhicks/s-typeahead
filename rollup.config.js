@@ -49,7 +49,6 @@ export default [
     }
   },
   {
-    external,
     input,
     plugins: [nodeResolve()],
     output: {

@@ -459,8 +459,18 @@ var STypeahead = (function (HTMLElement) {
    */
   STypeahead.prototype.triggerSelect = function triggerSelect (ev, clearDropdown) {
     var this$1 = this;
-    if ( clearDropdown === void 0 ) clearDropdown = false;
+    if ( clearDropdown === void 0 ) clearDropdown = true;
 
+    // if (this.options.requireSelectionFromList) {
+    //   this.getItemFromList(ev.target.textContent)
+    //     .then(listItem => this.input.value = listItem);
+    // } else {
+    //   let item = ev.target;
+    //   ev.stopPropagation();
+    //   this.input.value = item.textContent;
+    //   removeClass(item, this.hoverClass);
+    //   addClass(item, this.activeClass);
+    // }
     var item;
     if (ev) {
       if (ev.target) {
@@ -482,6 +492,7 @@ var STypeahead = (function (HTMLElement) {
         });
     }
     this.deselectItems(this.getDropdownItems());
+    console.log('this.input.value', this.input.value);
     document.dispatchEvent(new CustomEvent(("EVENT:s-typeahead:selectionChangedEvent" + (this._options.uid)), {detail: {id: this._options.uid, value: this.input.value}}));
     if (clearDropdown) { this.clearDropdown(); }
   };

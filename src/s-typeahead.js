@@ -393,7 +393,17 @@ class STypeahead extends HTMLElement {
    * and all other active elements are deactivated.
    * Call the optional onSelect function after.
    */
-  triggerSelect(ev, clearDropdown = false) {
+  triggerSelect(ev, clearDropdown = true) {
+    // if (this.options.requireSelectionFromList) {
+    //   this.getItemFromList(ev.target.textContent)
+    //     .then(listItem => this.input.value = listItem);
+    // } else {
+    //   let item = ev.target;
+    //   ev.stopPropagation();
+    //   this.input.value = item.textContent;
+    //   removeClass(item, this.hoverClass);
+    //   addClass(item, this.activeClass);
+    // }
     let item;
     if (ev) {
       if (ev.target) {
@@ -415,6 +425,7 @@ class STypeahead extends HTMLElement {
         });
     }
     this.deselectItems(this.getDropdownItems());
+    console.log('this.input.value', this.input.value);
     document.dispatchEvent(new CustomEvent(`EVENT:s-typeahead:selectionChangedEvent${this._options.uid}`, {detail: {id: this._options.uid, value: this.input.value}}));
     if (clearDropdown) this.clearDropdown();
   }
