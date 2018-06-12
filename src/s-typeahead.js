@@ -76,6 +76,7 @@ class STypeahead extends HTMLElement {
     let clickHandler, hoverHandler;
 
     [].forEach.call(items, (item, i) => {
+      console.log('item', item);
       this.registerEventListener(item, 'mousedown', this.triggerSelect.bind(this), this.clickHandlers);
       this.registerEventListener(item, 'mouseover', this.triggerHover.bind(this, i), this.hoverHandlers);
     });
@@ -408,7 +409,7 @@ class STypeahead extends HTMLElement {
     if (ev) {
       if (ev.target) {
         ev.stopPropagation();
-        item = ev.target;
+        item = ev.currentTarget;
       } else {
         item = ev;
       }

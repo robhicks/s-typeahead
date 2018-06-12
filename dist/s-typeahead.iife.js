@@ -122,6 +122,7 @@ var STypeahead = (function (HTMLElement) {
 
     var items = this.getDropdownItems();
     [].forEach.call(items, function (item, i) {
+      console.log('item', item);
       this$1.registerEventListener(item, 'mousedown', this$1.triggerSelect.bind(this$1), this$1.clickHandlers);
       this$1.registerEventListener(item, 'mouseover', this$1.triggerHover.bind(this$1, i), this$1.hoverHandlers);
     });
@@ -475,7 +476,7 @@ var STypeahead = (function (HTMLElement) {
     if (ev) {
       if (ev.target) {
         ev.stopPropagation();
-        item = ev.target;
+        item = ev.currentTarget;
       } else {
         item = ev;
       }

@@ -49,9 +49,9 @@ function addClass(el, name) {
 }
 
 /**
- * Adds a slist of classes to an element
+ * Removes a class from an element
  * @param {HTMLElement}  el   Element
- * @param {[String]} names classes to add (space delimited)
+ * @param {[String]} name class to remove
  * @return {Void}
  */
 function removeClass(el, name) {
@@ -60,12 +60,6 @@ function removeClass(el, name) {
   }
 }
 
-/**
- * Toggles a class on an element
- * @param {HTMLElement}  el   Element
- * @param {[String]} name class to add and remove
- * @return {Void}
- */
 function appendAfter(el, sibling) {
   if (el.nextSibling) {
       el.parentNode.insertBefore(sibling, el.nextSibling);
@@ -315,6 +309,7 @@ class STypeahead extends HTMLElement {
   bindItems() {
     let items = this.getDropdownItems();
     [].forEach.call(items, (item, i) => {
+      console.log('item', item);
       this.registerEventListener(item, 'mousedown', this.triggerSelect.bind(this), this.clickHandlers);
       this.registerEventListener(item, 'mouseover', this.triggerHover.bind(this, i), this.hoverHandlers);
     });
@@ -647,7 +642,7 @@ class STypeahead extends HTMLElement {
     if (ev) {
       if (ev.target) {
         ev.stopPropagation();
-        item = ev.target;
+        item = ev.currentTarget;
       } else {
         item = ev;
       }
