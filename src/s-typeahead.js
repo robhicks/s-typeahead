@@ -76,7 +76,6 @@ class STypeahead extends HTMLElement {
     let clickHandler, hoverHandler;
 
     [].forEach.call(items, (item, i) => {
-      console.log('item', item);
       this.registerEventListener(item, 'mousedown', this.triggerSelect.bind(this), this.clickHandlers);
       this.registerEventListener(item, 'mouseover', this.triggerHover.bind(this, i), this.hoverHandlers);
     });
@@ -426,7 +425,7 @@ class STypeahead extends HTMLElement {
         });
     }
     this.deselectItems(this.getDropdownItems());
-    console.log('this.input.value', this.input.value);
+    // console.log('this.input.value', this.input.value);
     document.dispatchEvent(new CustomEvent(`EVENT:s-typeahead:selectionChangedEvent${this._options.uid}`, {detail: {id: this._options.uid, value: this.input.value}}));
     if (clearDropdown) this.clearDropdown();
   }

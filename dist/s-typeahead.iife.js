@@ -122,7 +122,6 @@ var STypeahead = (function (HTMLElement) {
 
     var items = this.getDropdownItems();
     [].forEach.call(items, function (item, i) {
-      console.log('item', item);
       this$1.registerEventListener(item, 'mousedown', this$1.triggerSelect.bind(this$1), this$1.clickHandlers);
       this$1.registerEventListener(item, 'mouseover', this$1.triggerHover.bind(this$1, i), this$1.hoverHandlers);
     });
@@ -493,7 +492,7 @@ var STypeahead = (function (HTMLElement) {
         });
     }
     this.deselectItems(this.getDropdownItems());
-    console.log('this.input.value', this.input.value);
+    // console.log('this.input.value', this.input.value);
     document.dispatchEvent(new CustomEvent(("EVENT:s-typeahead:selectionChangedEvent" + (this._options.uid)), {detail: {id: this._options.uid, value: this.input.value}}));
     if (clearDropdown) { this.clearDropdown(); }
   };
