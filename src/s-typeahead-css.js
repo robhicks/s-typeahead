@@ -29,6 +29,8 @@ ul {
   position: absolute;
   width: 100%;
   z-index: 9999;
+  max-height: var(--list-height, 218px);
+  overflow-y: auto;
 }
 
 li {

@@ -1,4 +1,11 @@
-import { DataStore, StringBuilder, addClass, appendAfter, isJson, removeClass } from 's-utilities';
+function appendAfter(el, sibling) {
+  if (el.nextSibling) {
+      el.parentNode.insertBefore(sibling, el.nextSibling);
+      return;
+  }
+
+  el.parentNode.appendChild(sibling);
+}
 
 var css = `
 :host {
@@ -31,6 +38,8 @@ ul {
   position: absolute;
   width: 100%;
   z-index: 9999;
+  max-height: var(--list-height, 218px);
+  overflow-y: auto;
 }
 
 li {
@@ -58,6 +67,56 @@ li.hover {
 }
 
 `;
+
+class DataStore {
+  constructor() {
+    this.storeMap = {};
+  }
+
+  // this.get(el, "hi");
+  get(element, key) {
+    return this.getStore(element)[key] || null;
+  }
+
+  getAll() {
+    console.log("this.storeMap", this.storeMap);
+  }
+
+  // this.set(el, "hi", {"number": 4}
+  set(element, key, value) {
+    if (!value) return;
+    this.getStore(element)[key] = value;
+    return value;
+  }
+
+  // this.remove(el);
+  // this.remove(el, "hi");
+  remove(element, key) {
+    if (key) {
+      let store = this.getStore(element);
+      if (store[key]) delete store[key];
+    } else {
+      let elementId = element[this.storeId];
+      if (elementId) {
+        delete this.storeMap[elementId];
+        delete element[this.storeId];
+      }
+    }
+  }
+
+  getStore(element) {
+    let storeId = this.storeId;
+    let storeMap = this.storeMap;
+    let elementId = element[storeId];
+
+    if (!elementId) {
+      elementId = element[storeId] = this.uid++;
+      storeMap[elementId] = {};
+    }
+
+    return storeMap[elementId];
+  }
+}
 
 /*
  * findMatches
@@ -91,6 +150,34 @@ function generateList() {
   div.appendChild(ul);
 
   return {wrapper: div, dropdown: ul};
+}
+
+function isJson(str) {
+  try {
+    let json = JSON.parse(str);
+    return json;
+  } catch (e) {
+    return false;
+  }
+}
+
+class StringBuilder {
+  constructor(string = '') {
+    this.string = String(string);
+  }
+  toString() {
+    return this.string;
+  }
+  append(val) {
+    this.string += val;
+    return this;
+  }
+  insert(pos, val) {
+    let left = this.string.slice(0, pos);
+    let right = this.string.slice(pos);
+    this.string = left + val + right;
+    return this;
+  }
 }
 
 class STypeahead extends HTMLElement {
@@ -250,8 +337,8 @@ class STypeahead extends HTMLElement {
   deselectAllItems() {
     let items = this.getDropdownItems();
     items.forEach((item) => {
-      removeClass(item, this.activeClass);
-      removeClass(item, this.hoverClass);
+      item.classList.remove(this.activeClass);
+      item.classList.remove(this.hoverClass);
     });
   }
 
@@ -261,8 +348,8 @@ class STypeahead extends HTMLElement {
    */
   deselectItems(items = []) {
     [].forEach.call(items, (item, i) => {
-      removeClass(item, this.activeClass);
-      removeClass(item, this.hoverClass);
+      item.classList.remove(this.activeClass);
+      item.classList.remove(this.hoverClass);
     });
   }
 
@@ -437,8 +524,8 @@ class STypeahead extends HTMLElement {
     let items = this.getDropdownItems();
 
     if (items.length > 0 && items[index]) {
-      if (deselect) removeClass(items[index], this.activeClass);
-      else addClass(items[index], this.activeClass);
+      if (deselect) items[index].classList.remove(this.activeClass);
+      else items[index].classList.add(this.activeClass);
     }
   }
 
@@ -464,7 +551,7 @@ class STypeahead extends HTMLElement {
   triggerHover(index, evt) {
     let item = evt.target;
     this.deselectItems(this.getHoverItems());
-    addClass(item, this.hoverClass);
+    item.classList.add(this.hoverClass);
 
     this.setIndex(index);
     if (typeof this._options.onHover === 'function') {
@@ -480,16 +567,6 @@ class STypeahead extends HTMLElement {
    * Call the optional onSelect function after.
    */
   triggerSelect(ev, clearDropdown = true) {
-    // if (this.options.requireSelectionFromList) {
-    //   this.getItemFromList(ev.target.textContent)
-    //     .then(listItem => this.input.value = listItem);
-    // } else {
-    //   let item = ev.target;
-    //   ev.stopPropagation();
-    //   this.input.value = item.textContent;
-    //   removeClass(item, this.hoverClass);
-    //   addClass(item, this.activeClass);
-    // }
     let item;
     if (ev) {
       if (ev.target) {
@@ -502,8 +579,8 @@ class STypeahead extends HTMLElement {
 
     if (item) {
       this.input.value = item.textContent;
-      removeClass(item, this.hoverClass);
-      addClass(item, this.activeClass);
+      item.classList.remove(this.hoverClass);
+      item.classList.add(this.activeClass);
     } else if (this.options.requireSelectionFromList) {
       this.getItemFromList(this.currentValue)
         .then((listItem) => {

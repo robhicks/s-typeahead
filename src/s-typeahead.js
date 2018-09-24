@@ -1,7 +1,10 @@
-import {addClass, appendAfter, DataStore, isJson, removeClass, StringBuilder} from 's-utilities';
+import appendAfter from './appendAfter.js';
 import css from './s-typeahead-css.js';
+import DataStore from './DataStore.js';
 import findMatches from './findMatches.js';
 import generateList from './generateList.js';
+import isJson from './isJson.js';
+import StringBuilder from './StringBuilder.js';
 
 class STypeahead extends HTMLElement {
   constructor() {
@@ -164,8 +167,8 @@ class STypeahead extends HTMLElement {
   deselectAllItems() {
     let items = this.getDropdownItems();
     items.forEach((item) => {
-      removeClass(item, this.activeClass);
-      removeClass(item, this.hoverClass);
+      item.classList.remove(this.activeClass);
+      item.classList.remove(this.hoverClass);
     });
   }
 
@@ -175,8 +178,8 @@ class STypeahead extends HTMLElement {
    */
   deselectItems(items = []) {
     [].forEach.call(items, (item, i) => {
-      removeClass(item, this.activeClass);
-      removeClass(item, this.hoverClass);
+      item.classList.remove(this.activeClass);
+      item.classList.remove(this.hoverClass);
     });
   }
 
@@ -351,8 +354,8 @@ class STypeahead extends HTMLElement {
     let items = this.getDropdownItems();
 
     if (items.length > 0 && items[index]) {
-      if (deselect) removeClass(items[index], this.activeClass);
-      else addClass(items[index], this.activeClass);
+      if (deselect) items[index].classList.remove(this.activeClass);
+      else items[index].classList.add(this.activeClass);
     }
   }
 
@@ -378,7 +381,7 @@ class STypeahead extends HTMLElement {
   triggerHover(index, evt) {
     let item = evt.target;
     this.deselectItems(this.getHoverItems());
-    addClass(item, this.hoverClass);
+    item.classList.add(this.hoverClass);
 
     this.setIndex(index);
     if (typeof this._options.onHover === 'function') {
@@ -394,16 +397,6 @@ class STypeahead extends HTMLElement {
    * Call the optional onSelect function after.
    */
   triggerSelect(ev, clearDropdown = true) {
-    // if (this.options.requireSelectionFromList) {
-    //   this.getItemFromList(ev.target.textContent)
-    //     .then(listItem => this.input.value = listItem);
-    // } else {
-    //   let item = ev.target;
-    //   ev.stopPropagation();
-    //   this.input.value = item.textContent;
-    //   removeClass(item, this.hoverClass);
-    //   addClass(item, this.activeClass);
-    // }
     let item;
     if (ev) {
       if (ev.target) {
@@ -416,8 +409,8 @@ class STypeahead extends HTMLElement {
 
     if (item) {
       this.input.value = item.textContent;
-      removeClass(item, this.hoverClass);
-      addClass(item, this.activeClass);
+      item.classList.remove(this.hoverClass);
+      item.classList.add(this.activeClass);
     } else if (this.options.requireSelectionFromList) {
       this.getItemFromList(this.currentValue)
         .then((listItem) => {

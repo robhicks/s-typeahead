@@ -1,65 +1,3 @@
-Promise.allSettled = (promises) =>
-  Promise.all(promises.map((promise) =>
-    promise
-    .then((value) => ({
-      state: 'fulfilled',
-      value
-    }))
-    .catch((reason) => ({
-      state: 'rejected',
-      reason
-    }))
-  ));
-
-Promise.series = (array) => {
-  let results = [];
-  return array.reduce(function(p, item) {
-    return p.then(function() {
-      return item.then(function(data) {
-        results.push(data);
-        return results;
-      });
-    });
-  }, Promise.resolve());
-};
-
-// Promise.series = tasks => tasks.reduce((p, task) => p.then(task));
-
-/**
- * Checks to see if an element has a class
- * @param  {HTMLElement}  el   Element to check
- * @param  {String}  name class name to check
- * @return {Boolean}      True if the element has the class, otherwise false.
- */
-function hasClass(el, name) {
-  if (!el) return false;
-  return !el.className || el.className.match(new RegExp("(\\s|^)" + name + "(\\s|$)")) === null ? false : true;
-}
-
-/**
- * Adds a class to an element
- * @param {HTMLElement}  el   Element
- * @param {[String]} name class to add
- * @return {Void}
- */
-function addClass(el, name) {
-  if (!hasClass(el, name) && el) {
-    el.className += (el.className ? ' ' : '') + name;
-  }
-}
-
-/**
- * Removes a class from an element
- * @param {HTMLElement}  el   Element
- * @param {[String]} name class to remove
- * @return {Void}
- */
-function removeClass(el, name) {
-  if (el && hasClass(el, name)) {
-    el.className = el.className.replace(new RegExp('(\\s|^)' + name + '(\\s|$)'), ' ').replace(/^\s+|\s+$/g, '');
-  }
-}
-
 function appendAfter(el, sibling) {
   if (el.nextSibling) {
       el.parentNode.insertBefore(sibling, el.nextSibling);
@@ -68,6 +6,67 @@ function appendAfter(el, sibling) {
 
   el.parentNode.appendChild(sibling);
 }
+
+var css = `
+:host {
+  display: block;
+  box-sizing: border-box;
+  font-family: var(--font-family, arial);
+}
+
+input {
+  box-sizing: border-box;
+  border: var(--border, 1px solid #ddd);
+  border-top-right-radius: var(--radius, 5px);
+  border-top-left-radius: var(--radius, 5px);
+  color: var(--input-text-color, #444);
+  font-size: var(--font-size, 13px);
+  outline: 0;
+  padding: var(--input-padding, 6px);
+  margin: 0;
+  width: 100%;
+}
+
+.wrapper {
+  position: relative;
+}
+
+ul {
+  background: #fff;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  width: 100%;
+  z-index: 9999;
+  max-height: var(--list-height, 218px);
+  overflow-y: auto;
+}
+
+li {
+  border-bottom: var(--border, 1px solid #ddd);
+  border-left: var(--border, 1px solid #ddd);
+  border-right: var(--border, 1px solid #ddd);
+  color: var(--dropdown-text-color, #555);
+  font-family: var(--font-family, arial);
+  list-style-type: none;
+  padding: var(--dropdown-padding, 10px);
+}
+
+b {
+  color: var(--bold-color, blue);
+}
+
+li.highlight {
+  background-color: var(--highlight, rgb(228,240,255));
+  cursor: pointer;
+}
+
+li.hover {
+  background-color: var(--hover, rgb(228,240,244));
+  cursor: pointer;
+}
+
+`;
 
 class DataStore {
   constructor() {
@@ -119,93 +118,6 @@ class DataStore {
   }
 }
 
-function isJson(str) {
-  try {
-    let json = JSON.parse(str);
-    return json;
-  } catch (e) {
-    return false;
-  }
-}
-
-class StringBuilder {
-  constructor(string = '') {
-    this.string = String(string);
-  }
-  toString() {
-    return this.string;
-  }
-  append(val) {
-    this.string += val;
-    return this;
-  }
-  insert(pos, val) {
-    let left = this.string.slice(0, pos);
-    let right = this.string.slice(pos);
-    this.string = left + val + right;
-    return this;
-  }
-}
-
-var css = `
-:host {
-  display: block;
-  box-sizing: border-box;
-  font-family: var(--font-family, arial);
-}
-
-input {
-  box-sizing: border-box;
-  border: var(--border, 1px solid #ddd);
-  border-top-right-radius: var(--radius, 5px);
-  border-top-left-radius: var(--radius, 5px);
-  color: var(--input-text-color, #444);
-  font-size: var(--font-size, 13px);
-  outline: 0;
-  padding: var(--input-padding, 6px);
-  margin: 0;
-  width: 100%;
-}
-
-.wrapper {
-  position: relative;
-}
-
-ul {
-  background: #fff;
-  margin: 0;
-  padding: 0;
-  position: absolute;
-  width: 100%;
-  z-index: 9999;
-}
-
-li {
-  border-bottom: var(--border, 1px solid #ddd);
-  border-left: var(--border, 1px solid #ddd);
-  border-right: var(--border, 1px solid #ddd);
-  color: var(--dropdown-text-color, #555);
-  font-family: var(--font-family, arial);
-  list-style-type: none;
-  padding: var(--dropdown-padding, 10px);
-}
-
-b {
-  color: var(--bold-color, blue);
-}
-
-li.highlight {
-  background-color: var(--highlight, rgb(228,240,255));
-  cursor: pointer;
-}
-
-li.hover {
-  background-color: var(--hover, rgb(228,240,244));
-  cursor: pointer;
-}
-
-`;
-
 /*
  * findMatches
  * term: a string to be matched against
@@ -238,6 +150,34 @@ function generateList() {
   div.appendChild(ul);
 
   return {wrapper: div, dropdown: ul};
+}
+
+function isJson(str) {
+  try {
+    let json = JSON.parse(str);
+    return json;
+  } catch (e) {
+    return false;
+  }
+}
+
+class StringBuilder {
+  constructor(string = '') {
+    this.string = String(string);
+  }
+  toString() {
+    return this.string;
+  }
+  append(val) {
+    this.string += val;
+    return this;
+  }
+  insert(pos, val) {
+    let left = this.string.slice(0, pos);
+    let right = this.string.slice(pos);
+    this.string = left + val + right;
+    return this;
+  }
 }
 
 class STypeahead extends HTMLElement {
@@ -397,8 +337,8 @@ class STypeahead extends HTMLElement {
   deselectAllItems() {
     let items = this.getDropdownItems();
     items.forEach((item) => {
-      removeClass(item, this.activeClass);
-      removeClass(item, this.hoverClass);
+      item.classList.remove(this.activeClass);
+      item.classList.remove(this.hoverClass);
     });
   }
 
@@ -408,8 +348,8 @@ class STypeahead extends HTMLElement {
    */
   deselectItems(items = []) {
     [].forEach.call(items, (item, i) => {
-      removeClass(item, this.activeClass);
-      removeClass(item, this.hoverClass);
+      item.classList.remove(this.activeClass);
+      item.classList.remove(this.hoverClass);
     });
   }
 
@@ -584,8 +524,8 @@ class STypeahead extends HTMLElement {
     let items = this.getDropdownItems();
 
     if (items.length > 0 && items[index]) {
-      if (deselect) removeClass(items[index], this.activeClass);
-      else addClass(items[index], this.activeClass);
+      if (deselect) items[index].classList.remove(this.activeClass);
+      else items[index].classList.add(this.activeClass);
     }
   }
 
@@ -611,7 +551,7 @@ class STypeahead extends HTMLElement {
   triggerHover(index, evt) {
     let item = evt.target;
     this.deselectItems(this.getHoverItems());
-    addClass(item, this.hoverClass);
+    item.classList.add(this.hoverClass);
 
     this.setIndex(index);
     if (typeof this._options.onHover === 'function') {
@@ -627,16 +567,6 @@ class STypeahead extends HTMLElement {
    * Call the optional onSelect function after.
    */
   triggerSelect(ev, clearDropdown = true) {
-    // if (this.options.requireSelectionFromList) {
-    //   this.getItemFromList(ev.target.textContent)
-    //     .then(listItem => this.input.value = listItem);
-    // } else {
-    //   let item = ev.target;
-    //   ev.stopPropagation();
-    //   this.input.value = item.textContent;
-    //   removeClass(item, this.hoverClass);
-    //   addClass(item, this.activeClass);
-    // }
     let item;
     if (ev) {
       if (ev.target) {
@@ -649,8 +579,8 @@ class STypeahead extends HTMLElement {
 
     if (item) {
       this.input.value = item.textContent;
-      removeClass(item, this.hoverClass);
-      addClass(item, this.activeClass);
+      item.classList.remove(this.hoverClass);
+      item.classList.add(this.activeClass);
     } else if (this.options.requireSelectionFromList) {
       this.getItemFromList(this.currentValue)
         .then((listItem) => {

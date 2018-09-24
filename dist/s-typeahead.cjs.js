@@ -2,9 +2,64 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-var sUtilities = require('s-utilities');
+function appendAfter(el, sibling) {
+  if (el.nextSibling) {
+      el.parentNode.insertBefore(sibling, el.nextSibling);
+      return;
+  }
 
-var css = "\n:host {\n  display: block;\n  box-sizing: border-box;\n  font-family: var(--font-family, arial);\n}\n\ninput {\n  box-sizing: border-box;\n  border: var(--border, 1px solid #ddd);\n  border-top-right-radius: var(--radius, 5px);\n  border-top-left-radius: var(--radius, 5px);\n  color: var(--input-text-color, #444);\n  font-size: var(--font-size, 13px);\n  outline: 0;\n  padding: var(--input-padding, 6px);\n  margin: 0;\n  width: 100%;\n}\n\n.wrapper {\n  position: relative;\n}\n\nul {\n  background: #fff;\n  margin: 0;\n  padding: 0;\n  position: absolute;\n  width: 100%;\n  z-index: 9999;\n}\n\nli {\n  border-bottom: var(--border, 1px solid #ddd);\n  border-left: var(--border, 1px solid #ddd);\n  border-right: var(--border, 1px solid #ddd);\n  color: var(--dropdown-text-color, #555);\n  font-family: var(--font-family, arial);\n  list-style-type: none;\n  padding: var(--dropdown-padding, 10px);\n}\n\nb {\n  color: var(--bold-color, blue);\n}\n\nli.highlight {\n  background-color: var(--highlight, rgb(228,240,255));\n  cursor: pointer;\n}\n\nli.hover {\n  background-color: var(--hover, rgb(228,240,244));\n  cursor: pointer;\n}\n\n";
+  el.parentNode.appendChild(sibling);
+}
+
+var css = "\n:host {\n  display: block;\n  box-sizing: border-box;\n  font-family: var(--font-family, arial);\n}\n\ninput {\n  box-sizing: border-box;\n  border: var(--border, 1px solid #ddd);\n  border-top-right-radius: var(--radius, 5px);\n  border-top-left-radius: var(--radius, 5px);\n  color: var(--input-text-color, #444);\n  font-size: var(--font-size, 13px);\n  outline: 0;\n  padding: var(--input-padding, 6px);\n  margin: 0;\n  width: 100%;\n}\n\n.wrapper {\n  position: relative;\n}\n\nul {\n  background: #fff;\n  margin: 0;\n  padding: 0;\n  position: absolute;\n  width: 100%;\n  z-index: 9999;\n  max-height: var(--list-height, 218px);\n  overflow-y: auto;\n}\n\nli {\n  border-bottom: var(--border, 1px solid #ddd);\n  border-left: var(--border, 1px solid #ddd);\n  border-right: var(--border, 1px solid #ddd);\n  color: var(--dropdown-text-color, #555);\n  font-family: var(--font-family, arial);\n  list-style-type: none;\n  padding: var(--dropdown-padding, 10px);\n}\n\nb {\n  color: var(--bold-color, blue);\n}\n\nli.highlight {\n  background-color: var(--highlight, rgb(228,240,255));\n  cursor: pointer;\n}\n\nli.hover {\n  background-color: var(--hover, rgb(228,240,244));\n  cursor: pointer;\n}\n\n";
+
+var DataStore = function DataStore() {
+  this.storeMap = {};
+};
+
+// this.get(el, "hi");
+DataStore.prototype.get = function get (element, key) {
+  return this.getStore(element)[key] || null;
+};
+
+DataStore.prototype.getAll = function getAll () {
+  console.log("this.storeMap", this.storeMap);
+};
+
+// this.set(el, "hi", {"number": 4}
+DataStore.prototype.set = function set (element, key, value) {
+  if (!value) { return; }
+  this.getStore(element)[key] = value;
+  return value;
+};
+
+// this.remove(el);
+// this.remove(el, "hi");
+DataStore.prototype.remove = function remove (element, key) {
+  if (key) {
+    var store = this.getStore(element);
+    if (store[key]) { delete store[key]; }
+  } else {
+    var elementId = element[this.storeId];
+    if (elementId) {
+      delete this.storeMap[elementId];
+      delete element[this.storeId];
+    }
+  }
+};
+
+DataStore.prototype.getStore = function getStore (element) {
+  var storeId = this.storeId;
+  var storeMap = this.storeMap;
+  var elementId = element[storeId];
+
+  if (!elementId) {
+    elementId = element[storeId] = this.uid++;
+    storeMap[elementId] = {};
+  }
+
+  return storeMap[elementId];
+};
 
 /*
  * findMatches
@@ -41,6 +96,34 @@ function generateList() {
 
   return {wrapper: div, dropdown: ul};
 }
+
+function isJson(str) {
+  try {
+    var json = JSON.parse(str);
+    return json;
+  } catch (e) {
+    return false;
+  }
+}
+
+var StringBuilder = function StringBuilder(string) {
+  if ( string === void 0 ) string = '';
+
+  this.string = String(string);
+};
+StringBuilder.prototype.toString = function toString () {
+  return this.string;
+};
+StringBuilder.prototype.append = function append (val) {
+  this.string += val;
+  return this;
+};
+StringBuilder.prototype.insert = function insert (pos, val) {
+  var left = this.string.slice(0, pos);
+  var right = this.string.slice(pos);
+  this.string = left + val + right;
+  return this;
+};
 
 var STypeahead = (function (HTMLElement) {
   function STypeahead() {
@@ -85,7 +168,7 @@ var STypeahead = (function (HTMLElement) {
      li = document.createElement('li');
      var idx = item.toLowerCase().indexOf(this$1.currentValue.toLowerCase());
      var len = this$1.currentValue.length;
-     var str = idx !== -1 ? new sUtilities.StringBuilder(item).insert(idx, bs).insert(idx + len + 3, be).toString() : item;
+     var str = idx !== -1 ? new StringBuilder(item).insert(idx, bs).insert(idx + len + 3, be).toString() : item;
      li.innerHTML = str;
      fragment.appendChild(li);
    });
@@ -104,7 +187,7 @@ var STypeahead = (function (HTMLElement) {
 
     if (nVal && !(/\{\{|_hyper/).test(nVal) && nVal !== '' && nVal !== oVal) {
       if (name === 'options' && this._options) {
-        Object.assign(this._options, sUtilities.isJson(nVal) && nVal !== JSON.stringify(this._options) ? JSON.parse(nVal) : {});
+        Object.assign(this._options, isJson(nVal) && nVal !== JSON.stringify(this._options) ? JSON.parse(nVal) : {});
         if (this._options.list && typeof this._options.list[0] === 'object') {
           if (!this._options.propertyInObjectArrayToUse) { throw new Error('propertyInObjectArrayToUse required if list contains objects'); }
           this._options.list = this._options.list.map(function (li) { return li[this$1._options.propertyInObjectArrayToUse]; });
@@ -179,7 +262,7 @@ var STypeahead = (function (HTMLElement) {
     if (!this.onKeyupHandlerBound) { this.input.onkeyup = this.onKeyupHandler.bind(this); }
     // this.input.onfocus = this.onFocusHandler.bind(this);
     if (!this.onBlurHandlerBound) { this.input.onblur = this.onBlurHandler.bind(this); }
-    this.datastore = this.datastore || new sUtilities.DataStore();
+    this.datastore = this.datastore || new DataStore();
     this.actionFunctions = this.actionFunctions || {
       // Enter key
       13: function () { return this$1.triggerSelect(this$1.getDropdownItems()[this$1.index], true); },
@@ -203,7 +286,7 @@ var STypeahead = (function (HTMLElement) {
     this.hideDropdown();
 
     // Append it after the input
-    sUtilities.appendAfter(this.input, list.wrapper);
+    appendAfter(this.input, list.wrapper);
   };
 
   STypeahead.prototype.connectedCallback = function connectedCallback () {
@@ -219,8 +302,8 @@ var STypeahead = (function (HTMLElement) {
 
     var items = this.getDropdownItems();
     items.forEach(function (item) {
-      sUtilities.removeClass(item, this$1.activeClass);
-      sUtilities.removeClass(item, this$1.hoverClass);
+      item.classList.remove(this$1.activeClass);
+      item.classList.remove(this$1.hoverClass);
     });
   };
 
@@ -233,8 +316,8 @@ var STypeahead = (function (HTMLElement) {
     if ( items === void 0 ) items = [];
 
     [].forEach.call(items, function (item, i) {
-      sUtilities.removeClass(item, this$1.activeClass);
-      sUtilities.removeClass(item, this$1.hoverClass);
+      item.classList.remove(this$1.activeClass);
+      item.classList.remove(this$1.hoverClass);
     });
   };
 
@@ -418,8 +501,8 @@ var STypeahead = (function (HTMLElement) {
     var items = this.getDropdownItems();
 
     if (items.length > 0 && items[index]) {
-      if (deselect) { sUtilities.removeClass(items[index], this.activeClass); }
-      else { sUtilities.addClass(items[index], this.activeClass); }
+      if (deselect) { items[index].classList.remove(this.activeClass); }
+      else { items[index].classList.add(this.activeClass); }
     }
   };
 
@@ -445,7 +528,7 @@ var STypeahead = (function (HTMLElement) {
   STypeahead.prototype.triggerHover = function triggerHover (index, evt) {
     var item = evt.target;
     this.deselectItems(this.getHoverItems());
-    sUtilities.addClass(item, this.hoverClass);
+    item.classList.add(this.hoverClass);
 
     this.setIndex(index);
     if (typeof this._options.onHover === 'function') {
@@ -464,16 +547,6 @@ var STypeahead = (function (HTMLElement) {
     var this$1 = this;
     if ( clearDropdown === void 0 ) clearDropdown = true;
 
-    // if (this.options.requireSelectionFromList) {
-    //   this.getItemFromList(ev.target.textContent)
-    //     .then(listItem => this.input.value = listItem);
-    // } else {
-    //   let item = ev.target;
-    //   ev.stopPropagation();
-    //   this.input.value = item.textContent;
-    //   removeClass(item, this.hoverClass);
-    //   addClass(item, this.activeClass);
-    // }
     var item;
     if (ev) {
       if (ev.target) {
@@ -486,8 +559,8 @@ var STypeahead = (function (HTMLElement) {
 
     if (item) {
       this.input.value = item.textContent;
-      sUtilities.removeClass(item, this.hoverClass);
-      sUtilities.addClass(item, this.activeClass);
+      item.classList.remove(this.hoverClass);
+      item.classList.add(this.activeClass);
     } else if (this.options.requireSelectionFromList) {
       this.getItemFromList(this.currentValue)
         .then(function (listItem) {
