@@ -64,6 +64,8 @@ class STypeahead extends HTMLElement {
         }
         if (this._options.initialValue && this.input) this.input.value = this.options.initialValue;
         if (this._options.placeholder && this.input) this.input.placeholder = this._options.placeholder;
+        if (this.disabled) this.input.setAttribute('disabled', '');
+        else this.input.removeAttribute('disabled');
         this.createDropdown();
       }
     }
@@ -481,6 +483,15 @@ class STypeahead extends HTMLElement {
       this.displayDropdown();
   }
 
+  get disabled() {
+    return this.hasAttribute('disabled');
+  }
+
+  set disabled(value) {
+    if (value) this.setAttribute('disabled', '');
+    else this.removeAttribute('disabled');
+  }
+
   get options() {
     return this._options;
   }
@@ -492,7 +503,7 @@ class STypeahead extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['options'];
+    return ['disabled', 'options'];
   }
 }
 

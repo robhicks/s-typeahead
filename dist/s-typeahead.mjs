@@ -173,6 +173,7 @@ class StringBuilder {
     return this;
   }
   insert(pos, val) {
+    let length = this.string.length;
     let left = this.string.slice(0, pos);
     let right = this.string.slice(pos);
     this.string = left + val + right;
@@ -237,6 +238,8 @@ class STypeahead extends HTMLElement {
         }
         if (this._options.initialValue && this.input) this.input.value = this.options.initialValue;
         if (this._options.placeholder && this.input) this.input.placeholder = this._options.placeholder;
+        if (this.disabled) this.input.setAttribute('disabled', '');
+        else this.input.removeAttribute('disabled');
         this.createDropdown();
       }
     }
@@ -248,6 +251,8 @@ class STypeahead extends HTMLElement {
    */
   bindItems() {
     let items = this.getDropdownItems();
+    let wrapper = this.shadowRoot;
+
     [].forEach.call(items, (item, i) => {
       this.registerEventListener(item, 'mousedown', this.triggerSelect.bind(this), this.clickHandlers);
       this.registerEventListener(item, 'mouseover', this.triggerHover.bind(this, i), this.hoverHandlers);
@@ -651,6 +656,15 @@ class STypeahead extends HTMLElement {
       this.displayDropdown();
   }
 
+  get disabled() {
+    return this.hasAttribute('disabled');
+  }
+
+  set disabled(value) {
+    if (value) this.setAttribute('disabled', '');
+    else this.removeAttribute('disabled');
+  }
+
   get options() {
     return this._options;
   }
@@ -662,7 +676,7 @@ class STypeahead extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['options'];
+    return ['disabled', 'options'];
   }
 }
 
